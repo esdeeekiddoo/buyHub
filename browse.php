@@ -136,7 +136,7 @@ include __DIR__ . '/includes/header.php';
 
 <?php else: ?>
 
-    <div class="sheet rise-3">
+    <div class="rise-3">
         <div class="grid">
             <?php foreach ($items as $item): ?>
                 <article class="tile">

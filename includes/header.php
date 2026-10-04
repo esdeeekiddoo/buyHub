@@ -31,6 +31,8 @@ $flash = show_flash();
     <link rel="stylesheet" href="assets/style.css">
     <link rel="icon" type="image/png" href="assets/images/favicon.png">
 
+    <script>document.documentElement.classList.add('js');</script>
+
     <?php
     /* Randomise the faded gradient's centre on each page load, so the
        soft orange glow never covers the exact same spot twice.
@@ -52,7 +54,12 @@ $flash = show_flash();
 
         <a class="wordmark" href="index.php"><?= e($config['site_name']) ?></a>
 
-        <nav class="nav" aria-label="Main">
+        <button type="button" class="nav-toggle" data-nav-toggle
+                aria-expanded="false" aria-controls="main-nav" aria-label="Menu">
+            <?= icon('menu', ['size' => 20]) ?>
+        </button>
+
+        <nav class="nav" id="main-nav" aria-label="Main">
             <a class="nav__link" href="browse.php">
                 <?= icon('layout-grid', ['size' => 17]) ?>
                 <span>Browse</span>

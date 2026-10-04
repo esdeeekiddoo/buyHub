@@ -160,6 +160,9 @@ function icon_shapes(): array
 <path d="m8.5 8.5 5 5" />
 <circle cx="11" cy="11" r="8" />
 <path d="m21 21-4.3-4.3" />',
+        'menu' => '<path d="M4 6h16" />
+<path d="M4 12h16" />
+<path d="M4 18h16" />',
         'x' => '<path d="M18 6 6 18" />
 <path d="m6 6 12 12" />',
         'chevron-down' => '<path d="m6 9 6 6 6-6" />',

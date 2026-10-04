@@ -9,6 +9,7 @@
      3. "these two passwords do not match" before submitting
      4. the quantity stepper on the item page
      5. the toast message timing out on its own
+     6. the hamburger toggle for the nav on small screens
 
    Nothing here is required for an account to be created or a purchase to
    go through. Every rule that matters is enforced again on the server.
@@ -247,5 +248,39 @@
             toast.style.opacity = '0';
             window.setTimeout(function () { toast.remove(); }, 260);
         }, 5000);
+    }
+
+    /* ---------------------------------------------------------------
+       6. Mobile nav toggle
+       The button only appears on small screens (CSS), but the handler
+       is harmless anywhere: it flips a class, updates aria-expanded so
+       screen readers announce the change, and closes the menu after a
+       link is tapped or Escape is pressed.
+       --------------------------------------------------------------- */
+    var navToggle = document.querySelector('[data-nav-toggle]');
+    var nav = document.getElementById('main-nav');
+
+    if (navToggle && nav) {
+        var setOpen = function (open) {
+            nav.classList.toggle('nav--open', open);
+            navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+            navToggle.setAttribute('aria-label', open ? 'Close menu' : 'Menu');
+        };
+
+        navToggle.addEventListener('click', function () {
+            setOpen(!nav.classList.contains('nav--open'));
+        });
+
+        nav.addEventListener('click', function (event) {
+            if (event.target.closest('a, button')) { setOpen(false); }
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') { setOpen(false); }
+        });
+
+        document.addEventListener('click', function (event) {
+            if (!event.target.closest('.topbar')) { setOpen(false); }
+        });
     }
 })();

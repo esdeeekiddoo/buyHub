@@ -77,7 +77,7 @@ include __DIR__ . '/includes/header.php';
 
 <?php else: ?>
 
-    <div class="sheet rise-4">
+    <div class="rise-4">
         <div class="grid">
             <?php foreach ($items as $item): ?>
                 <article class="tile">
