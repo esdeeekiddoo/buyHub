@@ -1,0 +1,25 @@
+# Uploads folder protection
+# ------------------------------
+# This folder holds photos that MEMBERS upload. If PHP is allowed to run
+# files in here, someone could upload a disguised .php file and take over
+# the whole server. So we switch PHP off and forbid script files.
+#
+# If a photo still cannot be uploaded on your setup, ask about
+# AllowOverride in your Apache config - this file needs it enabled.
+
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+
+<FilesMatch "\.(php|phtml|php3|php4|php5|php7|phps|phar|cgi|pl|py|sh|htaccess)$">
+    Require all denied
+</FilesMatch>
+
+# Stop any PHP inside being treated as an image type.
+<IfModule mod_mime.c>
+    AddType text/plain .php .phtml .phar
+</IfModule>
+
+Options -Indexes -ExecCGI
+RemoveHandler .php .phtml .phar
+RemoveType .php .phtml .phar

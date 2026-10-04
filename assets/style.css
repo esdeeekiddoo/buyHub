@@ -1,0 +1,1770 @@
+/* =====================================================================
+   Mini Marketplace - design system
+   ---------------------------------------------------------------------
+   Palette, motion timings and easing are lifted from Keeby
+   (getkeeby.com) - its compiled stylesheet, not a guess:
+     neutrals #f5f5f5 / #171717 / #444444   (Keeby)
+     brand    #df280c                       (Shopee orange, darkened to pass AA)
+     easing cubic-bezier(.4,0,.2,1) | tap 150ms   (Keeby)
+
+   Typography roles:
+     Nunito  -> display + prices (rounded, friendly, the loud voice)
+     Inter   -> everything else (the quiet voice)
+
+   Radii are graded by size, so a big surface and a small control do not
+   share one corner radius:
+     6px   tiny chips      12px  inputs
+     16px  photos, tiles   24px  the sheet      999px  pills
+   ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   1. Tokens
+   --------------------------------------------------------------------- */
+:root {
+    /* --- neutral surfaces --- */
+    --paper:     #f5f5f5;                 /* body background (Keeby) */
+    --surface:   #ffffff;
+    --surface-2: #f7f7f8;
+
+    /* --- text --- */
+    --ink:       #171717;                 /* 17.9:1 on white */
+    --ink-2:     #444444;                 /*  9.7:1 on white */
+    --ink-3:     #8a8a8a;                 /*  3.5:1 - large text / decorative */
+    --ink-4:     #d6d6d6;                 /*  1.6:1 - borders and empty space only */
+
+    /* --- hairlines: Keeby uses alpha black, not grey ---
+       #0000001a = 10% black, #0000000d = 5% black */
+    --hairline:   rgba(0, 0, 0, 0.10);
+    --hairline-2: rgba(0, 0, 0, 0.05);
+
+    /* --- brand: Shopee orange, darkened just enough to be readable ---
+       Shopee's actual brand colour is #ee4d2d, but white text on it is only
+       3.66:1, which fails WCAG AA for normal-size text. These are the same
+       hue (8 degrees) at lower lightness:
+         #df280c  4.72:1   passes AA
+         #cb240b  5.53:1   passes AA, used for hover
+       The bright #f4511e is kept for large display type and fills, where
+       3:1 is the correct threshold. */
+    --brand:       #df280c;
+    --brand-dark:  #cb240b;
+    --brand-deep:  #a81f08;               /* text-safe orange for small print */
+    --brand-soft:  rgba(223, 40, 12, 0.08);
+    --brand-vivid: #f4511e;               /* Shopee-bright: fills and 24px+ text */
+
+    /* Keeby's own orange, kept for the shimmer sweep and the warm glow */
+    --accent:      #ff8c17;
+    --accent-lt:   #ffa743;
+    --accent-soft: rgba(255, 140, 23, 0.10);
+
+    --danger:      #ff6154;
+    --danger-ink:  #b3261e;
+
+    /* --- type --- */
+    --font-display: "Nunito", ui-rounded, "SF Pro Rounded", -apple-system,
+                    "Segoe UI", system-ui, sans-serif;
+    --font-ui:      "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+                    system-ui, sans-serif;
+
+    /* --- radii, graded by the size of the thing --- */
+    --r-xs:    6px;
+    --r-input: 12px;
+    --r-media: 16px;
+    --r-sheet: 24px;
+    --r-pill:  999px;
+
+    /* --- spacing scale --- */
+    --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px;
+    --s-5: 24px; --s-6: 32px; --s-7: 48px; --s-8: 64px;
+
+    /* Gap between item tiles. On the spacing scale, so it stays
+       proportional to everything else. Raise this if the grid feels
+       cramped - do not add borders or shadows, which double the edges. */
+    --tile-gap: var(--s-3);
+
+    /* --- motion: Keeby's own easing and tap duration --- */
+    --ease: cubic-bezier(0.4, 0, 0.2, 1);      /* --default-transition-timing-function */
+    --ease-out: cubic-bezier(0.22, 1, 0.36, 1); /* Keeby's .ios-blur-in curve */
+    --spring: cubic-bezier(0.34, 1.56, 0.64, 1); /* Keeby's .keycap-pop overshoot */
+    --tap: 150ms;                                /* --default-transition-duration */
+
+    --page-max: 1120px;
+}
+
+/* ---------------------------------------------------------------------
+   2. Reset
+   --------------------------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--paper);
+    /* The faded orange glow runs site-wide. The centre is randomised on
+       every page render in includes/header.php (via --glow-x / --glow-y).
+       Fixed so it stays put as the page scrolls. */
+    background-image: radial-gradient(
+        62% 78% at var(--glow-x, 50%) var(--glow-y, 0%),
+        rgba(255, 140, 23, 0.10) 0%,
+        transparent 60%
+    );
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    color: var(--ink-2);
+    font-family: var(--font-ui);
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
+}
+
+h1, h2, h3, p, figure { margin: 0; }
+img { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+
+::selection { background: var(--accent-soft); color: var(--ink); }
+
+/* Keyboard users must always see where they are. Never remove this. */
+:focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+    border-radius: var(--r-xs);
+}
+
+.sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+/* ---------------------------------------------------------------------
+   3. Page shell
+   --------------------------------------------------------------------- */
+.wrap {
+    width: 100%;
+    max-width: var(--page-max);
+    margin-inline: auto;
+    padding-inline: var(--s-4);
+}
+
+@media (min-width: 720px) {
+    .wrap { padding-inline: var(--s-5); }
+}
+
+/* ---------------------------------------------------------------------
+   4. Top bar - translucent, so content slides under it
+   --------------------------------------------------------------------- */
+.topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    /* Keeby uses saturate(150%) + blur on its sticky surfaces */
+    background: rgba(245, 245, 245, 0.82);
+    -webkit-backdrop-filter: saturate(150%) blur(18px);
+    backdrop-filter: saturate(150%) blur(18px);
+    border-bottom: 1px solid var(--hairline-2);
+}
+
+.topbar__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-4);
+    min-height: 60px;
+    flex-wrap: wrap;
+}
+
+.wordmark {
+    font-family: var(--font-display);
+    font-size: 19px;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+    white-space: nowrap;
+}
+
+.wordmark:hover { color: var(--brand); }
+
+.nav {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+    flex-wrap: wrap;
+}
+
+/* Links and buttons now hold an icon plus a label, so they need to be
+   flex containers with a gap rather than plain inline text. */
+.nav__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: var(--s-2) var(--s-3);
+    border-radius: var(--r-pill);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink-2);
+    transition: background var(--tap) var(--ease), color var(--tap) var(--ease);
+}
+
+.nav__link:hover { background: rgba(0, 0, 0, 0.05); color: var(--ink); }
+
+.nav__who {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: var(--ink-3);
+    padding-inline: var(--s-2);
+}
+
+.nav .btn--quiet {
+    display: inline-grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border-radius: 50%;
+    color: var(--ink-2);
+    background: none;
+    border: none;
+}
+
+.nav .btn--quiet:hover { background: rgba(0, 0, 0, 0.05); color: var(--ink); }
+
+.inline-form { display: inline; margin: 0; }
+
+/* quantity field on the cart rows */
+.qty {
+    width: 70px;
+    padding: 6px 10px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-input);
+    background: var(--surface-2);
+    color: var(--ink);
+    font: inherit;
+    font-size: 14px;
+}
+
+/* ---------------------------------------------------------------------
+   5. Buttons - with Keeby's rippleOut on press
+   --------------------------------------------------------------------- */
+.btn {
+    position: relative;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--s-2);
+    padding: 11px var(--s-4);
+    border: 1px solid transparent;
+    border-radius: var(--r-input);
+    /* Shopee's bright orange, darkened to #df280c so white text reaches
+       4.72:1 instead of failing at 3.66:1 */
+    background: var(--brand);
+    color: #fff;
+    font-family: var(--font-ui);
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.2;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background var(--tap) var(--ease), opacity var(--tap) var(--ease);
+}
+
+.btn:hover { background: var(--brand-dark); }
+
+/* Keeby's ripple: a circle expands from the centre and fades out.
+   This is motion that answers a press, so it is allowed. */
+.btn::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    margin: -6px 0 0 -6px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.45);
+    opacity: 0;
+    transform: scale(0.5);
+    pointer-events: none;
+}
+
+.btn:active::after { animation: rippleOut 520ms var(--ease) forwards; }
+
+.btn--block { width: 100%; }
+
+.btn--quiet {
+    background: transparent;
+    color: var(--ink);
+    border-color: var(--hairline);
+}
+
+.btn--quiet::after { background: rgba(0, 0, 0, 0.10); }
+.btn--quiet:hover { background: rgba(0, 0, 0, 0.04); }
+
+.btn--soft {
+    background: var(--brand-soft);
+    color: var(--brand);
+}
+
+.btn--soft::after { background: rgba(223, 40, 12, 0.18); }
+.btn--soft:hover { background: rgba(223, 40, 12, 0.14); }
+
+.btn--danger { background: transparent; color: var(--danger-ink); }
+.btn--danger::after { background: rgba(255, 97, 84, 0.28); }
+.btn--danger:hover { background: rgba(255, 97, 84, 0.10); }
+
+.btn[disabled], .btn[aria-disabled="true"] {
+    background: rgba(0, 0, 0, 0.08);
+    color: var(--ink-3);
+    cursor: default;
+}
+
+.btn--small { padding: 7px var(--s-3); font-size: 13.5px; }
+
+/* Buttons holding only an icon need a square hit area, not the wide
+   padding of a labelled button. */
+.btn--icon { width: 38px; height: 38px; padding: 0; }
+
+/* A tile's Buy button must not wrap its label away */
+.btn--small span { white-space: nowrap; }
+
+/* ---------------------------------------------------------------------
+   6. Masthead - Keeby's orange radial glow, straight from its CSS
+   --------------------------------------------------------------------- */
+.masthead {
+    padding: var(--s-7) 0 var(--s-6);
+    /* The faded Keeby radial glow now lives on <body> for every page,
+       so nothing extra is drawn here - that would double it up. */
+}
+
+.masthead h1 {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 5.2vw, 44px);
+    font-weight: 800;
+    line-height: 1.08;
+    letter-spacing: -0.035em;
+    color: var(--ink);
+    max-width: 18ch;
+}
+
+.masthead p {
+    margin-top: var(--s-3);
+    max-width: 47ch;
+    font-size: 16px;
+    color: var(--ink-2);
+}
+
+.tally {
+    margin-top: var(--s-5);
+    font-size: 14px;
+    color: var(--ink-3);
+}
+
+/* ---------------------------------------------------------------------
+   7. The grid
+   ---------------------------------------------------------------------
+   Tiles are cut from ONE clipped sheet, separated by a 2px gap of the
+   sheet's own white. Two reasons for that choice:
+
+     - a hairline-coloured gap shows as a grey block wherever the last row
+       is short, because there are no tiles to cover the empty cells
+     - 2px of white is not enough to read as "two separate cards", so the
+       page stays one surface instead of a wall of floating boxes
+
+   If you want the tiles to breathe more, raise --tile-gap below rather
+   than adding a border or a shadow. A gap separates without adding a
+   second edge to look at.
+   --------------------------------------------------------------------- */
+.sheet {
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-sheet);
+    overflow: hidden;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--tile-gap);
+    background: var(--surface);
+}
+
+@media (min-width: 660px)  { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 1000px) { .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+/* ---------------------------------------------------------------------
+   8. Tile
+   --------------------------------------------------------------------- */
+.tile {
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    min-width: 0;
+}
+
+.tile__media {
+    display: block;
+    aspect-ratio: 1 / 1;
+    background: var(--surface-2);
+    overflow: hidden;
+}
+
+.tile__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 320ms var(--ease);
+}
+
+.tile:active .tile__media img { transform: scale(0.975); }
+
+/* Keeby's keebyLoaderPulse: a slot with no image breathes instead of
+   sitting dead. */
+.tile__photo-missing {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    font-size: 13px;
+    color: var(--ink-3);
+    animation: keebyLoaderPulse 1.3s var(--ease) infinite;
+}
+
+.tile__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-1);
+    padding: var(--s-3) var(--s-3) var(--s-4);
+    flex: 1;
+}
+
+.tile__title {
+    font-size: 14.5px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--ink);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.tile__note {
+    font-size: 12.5px;
+    color: var(--ink-3);
+}
+
+/* --- the price: the one deliberately loud element on the page --- */
+.price {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    /* 20px bold qualifies as large text, where 3:1 is the bar, so this can
+       carry Shopee's vivid orange rather than the darker one */
+    color: var(--brand-vivid);
+    line-height: 1.1;
+}
+
+.price--large {
+    font-size: clamp(32px, 6vw, 42px);
+    letter-spacing: -0.035em;
+    color: var(--brand-vivid);
+}
+
+/* Keeby's signature shimmer: an orange gradient sweeping through the
+   glyphs. Applied to exactly one element - the price on the item page.
+   background-clip:text is widely supported but not everywhere, so the
+   solid colour above stays as the fallback. */
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+    .price--shimmer {
+        background-image: linear-gradient(90deg, var(--accent), var(--accent-lt), var(--accent));
+        background-size: 260%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        -webkit-text-fill-color: transparent;
+        animation: 4s linear infinite keebyShimmer;
+    }
+}
+
+.tile__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-2);
+    margin-top: auto;
+    padding-top: var(--s-3);
+}
+
+/* ---------------------------------------------------------------------
+   9. Toast - Keeby's .ios-blur-in, on a dark #171717 pill
+   --------------------------------------------------------------------- */
+.toast {
+    position: fixed;
+    left: 50%;
+    bottom: var(--s-5);
+    transform: translateX(-50%);
+    z-index: 40;
+    max-width: min(520px, calc(100vw - 32px));
+    padding: var(--s-3) var(--s-5);
+    border-radius: var(--r-pill);
+    background: rgba(23, 23, 23, 0.94);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    color: #fff;
+    font-size: 14.5px;
+    font-weight: 500;
+    text-align: center;
+    animation: 550ms var(--ease-out) both iosBlurIn;
+}
+
+.toast--error { background: rgba(179, 38, 30, 0.95); }
+
+/* ---------------------------------------------------------------------
+   10. Item detail
+   --------------------------------------------------------------------- */
+.detail {
+    display: grid;
+    gap: var(--s-6);
+    padding: var(--s-5);
+    margin-block: var(--s-6);
+}
+
+@media (min-width: 860px) {
+    .detail {
+        grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+        gap: var(--s-7);
+        padding: var(--s-6);
+    }
+}
+
+.detail__media {
+    border-radius: var(--r-media);
+    overflow: hidden;
+    background: var(--surface-2);
+    aspect-ratio: 1 / 1;
+}
+
+.detail__media img { width: 100%; height: 100%; object-fit: cover; }
+
+.detail__title {
+    font-family: var(--font-display);
+    font-size: clamp(24px, 4vw, 32px);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+}
+
+.detail__price { margin-top: var(--s-3); }
+
+.detail__desc {
+    margin-top: var(--s-4);
+    max-width: 62ch;
+    font-size: 15.5px;
+    color: var(--ink-2);
+    white-space: pre-line;
+}
+
+/* Stock state as a dot plus words. Keeby's orange marks the scarce ones,
+   its blue marks the healthy ones. */
+.status {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-2);
+    margin-top: var(--s-4);
+    font-size: 14px;
+    color: var(--ink-2);
+}
+
+.status::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--brand-vivid);
+    flex: none;
+}
+
+.status--low::before {
+    background: var(--danger);
+    animation: pulse 2s ease-in-out infinite;   /* Keeby's pulse */
+}
+
+.status--gone::before { background: var(--ink-4); }
+
+.detail__by {
+    margin-top: var(--s-2);
+    font-size: 13.5px;
+    color: var(--ink-3);
+}
+
+.detail__action {
+    margin-top: var(--s-5);
+    padding-top: var(--s-5);
+    border-top: 1px solid var(--hairline);
+}
+
+/* The buy and add-to-cart buttons line up vertically under the stepper. */
+.detail__action form .btn--block + .btn--block {
+    margin-top: var(--s-2);
+}
+
+/* Quantity stepper */
+.stepper {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-1);
+    padding: var(--s-1);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-input);
+    background: var(--surface-2);
+}
+
+.stepper button {
+    width: 38px;
+    height: 38px;
+    border: none;
+    border-radius: var(--r-xs);
+    background: var(--surface);
+    color: var(--ink);
+    font-size: 19px;
+    font-weight: 500;
+    line-height: 1;
+    cursor: pointer;
+    transition: background var(--tap) var(--ease), transform var(--tap) var(--ease);
+}
+
+.stepper button:hover { background: rgba(0, 0, 0, 0.05); }
+.stepper button:active { transform: scale(0.9); }
+
+/* Keeby's keycapPop: a spring overshoot when the number changes */
+.stepper input {
+    width: 56px;
+    height: 38px;
+    border: none;
+    background: none;
+    text-align: center;
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--ink);
+    -moz-appearance: textfield;
+}
+
+.stepper input::-webkit-outer-spin-button,
+.stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+.stepper input:focus { outline: none; }
+
+/* Keeby's .keycap-pop curve, applied through the spring token */
+.stepper.is-bumped input { animation: 300ms var(--spring) both keycapPop; }
+
+.stepper:focus-within {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+}
+
+.stepper__max {
+    margin-top: var(--s-2);
+    font-size: 13px;
+    color: var(--ink-3);
+}
+
+/* ---------------------------------------------------------------------
+   11. Row list - "My items"
+   --------------------------------------------------------------------- */
+.rows { display: flex; flex-direction: column; }
+
+.row {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--s-4);
+    padding: var(--s-3) var(--s-4);
+    border-top: 1px solid var(--hairline-2);
+}
+
+.row:first-child { border-top: none; }
+
+.row__thumb {
+    width: 64px;
+    height: 64px;
+    border-radius: var(--r-xs);
+    object-fit: cover;
+    background: var(--surface-2);
+}
+
+/* A tile instead of a photo, for rows that have no image (orders). */
+.row__thumb--icon {
+    display: grid;
+    place-items: center;
+    color: var(--ink-3);
+}
+
+.row__main { min-width: 0; }
+
+.row__title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.row__title:hover { color: var(--brand); }
+
+.row__meta {
+    margin-top: 2px;
+    font-size: 13px;
+    color: var(--ink-3);
+}
+
+.row__end {
+    display: flex;
+    align-items: center;
+    gap: var(--s-3);
+}
+
+.row__actions { display: flex; gap: var(--s-1); }
+
+/* ---------------------------------------------------------------------
+   12. Forms
+   --------------------------------------------------------------------- */
+.panel {
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-sheet);
+    padding: var(--s-5);
+    max-width: 520px;
+}
+
+@media (min-width: 720px) { .panel { padding: var(--s-6); } }
+
+.panel--wide { max-width: 620px; }
+
+/* Inside the two-column auth layout the panel is a grid item, so its own
+   max-width would fight the column width. Let the column decide. */
+.auth .panel { max-width: none; width: 100%; }
+
+.page-head { padding: var(--s-7) 0 var(--s-5); }
+
+.page-head h1 {
+    font-family: var(--font-display);
+    font-size: clamp(24px, 4.4vw, 32px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    color: var(--ink);
+}
+
+.page-head p {
+    margin-top: var(--s-2);
+    max-width: 54ch;
+    color: var(--ink-2);
+}
+
+.page-head__desc {
+    margin-top: var(--s-3);
+    max-width: 58ch;
+    font-size: 15px;
+    line-height: 1.55;
+}
+
+/* ---------------------------------------------------------------------
+   Field spacing
+   ---------------------------------------------------------------------
+   Vertical rhythm comes from ONE place: the gap between siblings. Each
+   .field adds its own top margin, and the first one in a group cancels
+   it.
+
+   :first-of-type was the wrong tool. It counts DOM position, so inside a
+   two-column .field-pair only the left field is "first" - which is how
+   Phone ended up 12px above City. Gaps do not have that problem: they
+   cannot collapse, and they treat both columns identically.
+   --------------------------------------------------------------------- */
+.field { margin-top: var(--s-5); }
+
+/* Inside a .field-pair the grid's row-gap handles the spacing, so the
+   per-field top margin has to go or the row grows taller than it should. */
+.field-pair .field { margin-top: 0; }
+
+/* The first .field in a form or fieldset sits flush against whatever is
+   above it. is(:first-of-type) is still DOM position, so this only
+   applies where there genuinely is one field at the top. */
+.form > .field:first-of-type,
+.fieldset > .field:first-of-type { margin-top: 0; }
+
+.field label {
+    display: block;
+    margin-bottom: var(--s-2);
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--ink);
+}
+
+/* ---------------------------------------------------------------------
+   Bare inputs, for fields with no icon.
+   ---------------------------------------------------------------------
+   These rules used to style every input in a .field. That broke once
+   .control arrived, because a selector like .field input[type="email"]
+   scores (0,2,1) and beat .control input at (0,1,1) - so the input kept
+   its own border and radius and drew a box inside the wrapper.
+
+   The fix is to scope this to inputs that are NOT inside a .control.
+   :not() takes the specificity of its argument, so this still outranks a
+   plain .field input, but it no longer touches anything .control owns.
+   --------------------------------------------------------------------- */
+.field input:not(.control input),
+.field textarea:not(.control textarea),
+.field select:not(.control select) {
+    width: 100%;
+    padding: 11px var(--s-3);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-input);
+    background: var(--surface-2);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 500;
+    transition: border-color var(--tap) var(--ease),
+                background var(--tap) var(--ease),
+                box-shadow var(--tap) var(--ease);
+}
+
+.field textarea:not(.control textarea) {
+    resize: vertical;
+    min-height: 110px;
+    line-height: 1.55;
+}
+
+.field input:not(.control input):hover,
+.field textarea:not(.control textarea):hover { border-color: rgba(0, 0, 0, 0.20); }
+
+/* Soft orange focus ring instead of a hard outline */
+.field input:not(.control input):focus,
+.field textarea:not(.control textarea):focus {
+    outline: none;
+    background: var(--surface);
+    border-color: var(--brand);
+    box-shadow: 0 0 0 3px var(--brand-soft);
+}
+
+.field .help {
+    margin-top: var(--s-2);
+    font-size: 13px;
+    color: var(--ink-3);
+}
+
+.field .help code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12.5px;
+    background: var(--surface-2);
+    padding: 1px 5px;
+    border-radius: 4px;
+    word-break: break-all;
+}
+
+/* A pair of fields side by side. gap does the spacing in BOTH
+   directions, so the two columns line up whatever their content. */
+.field-pair {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--s-5) var(--s-4);      /* row-gap, column-gap */
+    margin-top: var(--s-5);
+}
+
+@media (min-width: 560px) {
+    .field-pair { grid-template-columns: 1fr 1fr; }
+}
+
+.form-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--s-3);
+    margin-top: var(--s-6);
+    flex-wrap: wrap;
+}
+
+.problems {
+    margin-bottom: var(--s-5);
+    padding: var(--s-4);
+    border: 1px solid rgba(179, 38, 30, 0.25);
+    border-radius: var(--r-input);
+    background: rgba(179, 38, 30, 0.05);
+}
+
+.problems p { font-size: 14px; color: var(--danger-ink); }
+.problems p + p { margin-top: var(--s-1); }
+
+/* ---------------------------------------------------------------------
+   12a. Icons
+   ---------------------------------------------------------------------
+   Every icon is inline SVG on a 24x24 grid with stroke="currentColor",
+   so it inherits the colour of the text beside it. vertical-align keeps
+   them on the text baseline rather than floating.
+   --------------------------------------------------------------------- */
+.icon {
+    display: inline-block;
+    vertical-align: -0.18em;      /* optical centring next to 15px text */
+    flex: none;                   /* never let a flex parent squash it */
+    stroke-width: 2;
+}
+
+/* In a button or nav link, sit beside the label with a consistent gap */
+.btn .icon,
+.nav__link .icon,
+.nav__who .icon {
+    opacity: 0.9;
+}
+
+.btn { gap: var(--s-2); }
+
+/* The tick list on the login and register pages */
+.auth__points li {
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr);
+    align-items: start;
+    gap: var(--s-3);
+    padding-left: 0;
+}
+
+.auth__points li::before { content: none; }   /* replaced by the real icon */
+
+.auth__points .tick {
+    margin-top: 2px;
+    color: var(--brand);
+}
+
+/* Error list rows line up their icon with the first line of text */
+.problems p {
+    display: grid;
+    grid-template-columns: 18px minmax(0, 1fr);
+    gap: var(--s-2);
+    align-items: start;
+}
+
+.problems__icon { margin-top: 2px; }
+
+/* ---------------------------------------------------------------------
+   12b. Form controls with a leading icon
+   ---------------------------------------------------------------------
+   .control is the wrapper: icon on the left, input on the right. The
+   input keeps its own background so the focus ring wraps the text, not
+   the icon, and the border colour is driven from .control:focus-within so
+   the whole thing lights up together.
+   --------------------------------------------------------------------- */
+.control {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+    padding-inline: var(--s-3);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-input);
+    background: var(--surface-2);
+    transition: border-color var(--tap) var(--ease),
+                box-shadow var(--tap) var(--ease),
+                background var(--tap) var(--ease);
+}
+
+.control:hover { border-color: rgba(0, 0, 0, 0.20); }
+
+.control:focus-within {
+    background: var(--surface);
+    border-color: var(--brand);
+    box-shadow: 0 0 0 3px var(--brand-soft);
+}
+
+.control__icon {
+    color: var(--ink-3);
+    transition: color var(--tap) var(--ease);
+}
+
+.control:focus-within .control__icon { color: var(--brand); }
+
+/* The input inside a .control is just a transparent text area - all the
+   chrome belongs to the wrapper. */
+/* The date input needs room for the browser's own mm/dd/yyyy segments
+   and its calendar picker button. Without this the text overlaps the
+   picker icon, which is exactly what the screenshot showed. */
+.control input[type="date"] {
+    min-width: 0;
+    padding-right: var(--s-2);
+}
+
+.control input[type="date"]::-webkit-datetime-edit {
+    padding: 0;
+}
+
+/* Older WebKit kept the segments in shadow DOM, unreachable with a plain
+   class, so it takes a pseudo-element selector instead. */
+.control input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+    padding: 0;
+}
+
+.control input,
+.control textarea,
+.control select {
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;                 /* lets it shrink inside flex */
+    padding: 11px 0;
+    border: none;
+    background: none;
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.control input:focus,
+.control textarea:focus,
+.control select:focus {
+    outline: none;                /* the wrapper shows focus instead */
+}
+
+/* Date and time inputs keep their own picker icon, so hide the duplicate
+   the browser draws inside the field. */
+.control input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0.45;
+    cursor: pointer;
+}
+
+.control--area { align-items: flex-start; padding-block: var(--s-1); }
+.control--area .control__icon--top { margin-top: 12px; }
+
+.control textarea {
+    resize: vertical;
+    min-height: 104px;
+    line-height: 1.55;
+    padding-block: var(--s-2);
+}
+
+/* ---------------------------------------------------------------------
+   Dropdowns
+   ---------------------------------------------------------------------
+   The native <select> arrow is removed and replaced with our own caret,
+   so the icon matches every other control on the page. That means three
+   things have to be fixed by hand, or the dropdown breaks:
+
+     - appearance:none removes the arrow, but it also removes the
+       platform's own padding and line-height, so those are set here
+     - the caret sits on top of the text, so the select needs right
+       padding to make room for it
+     - clicks must pass through the caret to the select underneath,
+       hence pointer-events:none
+   --------------------------------------------------------------------- */
+.control--select { position: relative; }
+
+.control select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+    /* room for the caret, plus the wrapper's own padding */
+    padding-right: var(--s-6);
+    /* appearance:none drops the platform line-height, so restore it or
+       the option text sits off-centre against the icon */
+    line-height: 1.4;
+    text-overflow: ellipsis;
+}
+
+.control select option {
+    /* Safari renders option text in the system colour unless told
+       otherwise, which makes a selected option look disabled. */
+    color: var(--ink);
+    background: var(--surface);
+}
+
+.control select:focus { outline: none; }
+
+.control__caret {
+    position: absolute;
+    right: var(--s-3);
+    top: 50%;
+    transform: translateY(-50%);   /* true centring, not a guess */
+    color: var(--ink-3);
+    pointer-events: none;          /* clicks must reach the select */
+    transition: color var(--tap) var(--ease);
+}
+
+.control--select:focus-within .control__caret { color: var(--brand); }
+
+/* A disabled select should not look interactive */
+.control select:disabled { color: var(--ink-3); cursor: not-allowed; }
+
+/* File inputs: the native button is hidden, the whole label is the target */
+.control--file input[type="file"] {
+    padding: 9px 0;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.control--file input[type="file"]::file-selector-button {
+    margin-right: var(--s-3);
+    padding: 6px 12px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-xs);
+    background: var(--surface);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--tap) var(--ease);
+}
+
+.control--file input[type="file"]::file-selector-button:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+/* --- password reveal button --- */
+.control__reveal {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    flex: none;
+    margin-right: -4px;
+    border: none;
+    border-radius: var(--r-xs);
+    background: none;
+    color: var(--ink-3);
+    cursor: pointer;
+    transition: color var(--tap) var(--ease), background var(--tap) var(--ease);
+}
+
+.control__reveal:hover { color: var(--ink); background: rgba(0, 0, 0, 0.05); }
+
+/* Only one of the two eyes is visible at a time */
+.control__reveal .reveal-off { display: none; }
+.control__reveal.is-on .reveal-on  { display: none; }
+.control__reveal.is-on .reveal-off { display: block; }
+
+/* --- the two-line error list, stacked and spaced ---
+   These appear before the form, where a full-width row reads better than
+   a line-broken sentence. This block is deliberately NOT the 12-column
+   grid used by .problems p inside forms, which sit in a narrow panel. */
+.form-errors {
+    margin-bottom: var(--s-5);
+    padding: var(--s-4);
+    border: 1px solid rgba(179, 38, 30, 0.25);
+    border-radius: var(--r-input);
+    background: rgba(179, 38, 30, 0.05);
+}
+
+.form-errors p {
+    display: grid;
+    grid-template-columns: 18px minmax(0, 1fr);
+    gap: var(--s-2);
+    align-items: start;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--danger-ink);
+}
+
+.form-errors p + p { margin-top: var(--s-3); }
+.form-errors__icon { margin-top: 2px; }
+
+/* The strength meter needs to sit directly under its field, but the bar
+   alone looks odd without a label, so give it its own reserved row. */
+.strength[hidden] { display: none; }
+
+/* --- password strength --- */
+.strength {
+    display: flex;
+    align-items: center;
+    gap: var(--s-3);
+    margin-top: var(--s-2);
+}
+
+.strength__bar {
+    flex: 1;
+    height: 4px;
+    border-radius: var(--r-pill);
+    background: rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.strength__fill {
+    display: block;
+    height: 100%;
+    width: 0;
+    border-radius: inherit;
+    /* Width is set by JS; only the colour comes from CSS */
+    background: var(--ink-3);
+    transition: width 260ms var(--ease), background 260ms var(--ease);
+}
+
+.strength__label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ink-2);
+    min-width: 84px;
+}
+
+/* The bar colour comes from data-score, so the mapping lives in one place */
+.strength[data-score="1"] .strength__fill { background: #d92d20; }
+.strength[data-score="2"] .strength__fill { background: #f79009; }
+.strength[data-score="3"] .strength__fill { background: #fdb022; }
+.strength[data-score="4"] .strength__fill { background: #66c61c; }
+.strength[data-score="5"] .strength__fill { background: #17b26a; }
+
+/* --- live password match note --- */
+.help.is-bad  { color: var(--danger-ink); font-weight: 600; }
+.help.is-good { color: #067647; font-weight: 600; }
+
+/* --- optional fieldset --- */
+.fieldset {
+    margin: var(--s-6) 0 0;
+    padding: var(--s-4);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-input);
+    background: var(--surface-2);
+}
+
+.fieldset__legend {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+    padding-inline: var(--s-2);
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ink-2);
+}
+
+.fieldset__icon { color: var(--ink-3); }
+/* The legend sits on the fieldset's border, so the first row of fields
+   only needs a little breathing room under it. */
+.fieldset > .field:first-of-type,
+.fieldset > .field-pair:first-of-type { margin-top: var(--s-3); }
+
+/* --- seller block on the item page --- */
+.seller {
+    display: flex;
+    align-items: center;
+    gap: var(--s-3);
+    margin-top: var(--s-2);
+}
+
+/* Initials avatar: no image file needed, no upload needed */
+.seller__avatar {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    flex: none;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--brand-deep);
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+
+.seller__name {
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--ink);
+}
+
+.seller__meta { font-size: 13px; color: var(--ink-3); }
+
+/* --- seller line on a tile --- */
+.tile__seller {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 2px;
+    font-size: 12.5px;
+    color: var(--ink-3);
+}
+
+.tile__seller .icon { opacity: 0.7; }
+.tile__city { opacity: 0.75; }
+
+.row__meta {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.row__meta-icon { opacity: 0.75; }
+
+/* Empty state gets an icon above the heading */
+.empty__icon {
+    display: grid;
+    place-items: center;
+    width: 62px;
+    height: 62px;
+    margin: 0 auto var(--s-4);
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--brand);
+}
+
+.empty .btn { gap: var(--s-2); }
+
+/* ---------------------------------------------------------------------
+   12d. Search and filters
+   ---------------------------------------------------------------------
+   Two pieces: .searchbar is the single box on the home page, .filters is
+   the full panel on browse.php. Both are GET forms, so every state is a
+   URL someone can bookmark or share.
+   --------------------------------------------------------------------- */
+.searchbar {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+    margin-bottom: var(--s-4);
+}
+
+.searchbar__field {
+    flex: 1;
+    min-width: 0;
+    /* Slightly taller than a form control: this is the primary action
+       on the page, so it gets the larger touch target. */
+    padding-block: 14px;
+}
+
+.searchbar__filters,
+.filters__clear {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex: none;
+    padding: 11px var(--s-4);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-input);
+    background: var(--surface);
+    color: var(--ink-2);
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: background var(--tap) var(--ease), color var(--tap) var(--ease);
+}
+
+.searchbar__filters:hover,
+.filters__clear:hover { background: rgba(0, 0, 0, 0.04); color: var(--ink); }
+
+.filters {
+    margin-bottom: var(--s-5);
+}
+
+/* The search row reuses .searchbar from the dashboard, so both pages
+   share one control. Its own margin-bottom is the gap above the strip. */
+.filters .searchbar { margin-bottom: var(--s-3); }
+
+/* The secondary controls, wrapping to as many lines as needed.
+   Deliberately NOT a boxed panel: the dashboard has no box around its
+   search bar, so a border here would make browse look like a different
+   product. The controls carry their own borders instead. */
+.filters__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-2);
+}
+
+/* Secondary controls sit a size below the main search field, so the
+   hierarchy reads: search first, refine second. */
+.filters .filters__ctrl {
+    flex: 1 1 150px;
+    min-width: 132px;
+    max-width: 220px;
+    padding-block: 8px;
+}
+
+.filters .filters__ctrl input,
+.filters .filters__ctrl select {
+    padding-block: 8px;
+    font-size: 14px;
+}
+
+.filters .filters__ctrl select { padding-right: var(--s-5); }
+.filters .filters__ctrl .control__caret { right: var(--s-2); }
+
+.filters__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+    flex: none;
+    margin-left: auto;
+}
+
+.filters__clear {
+    background: transparent;
+    border-color: transparent;
+    color: var(--ink-3);
+    padding: 9px var(--s-3);
+}
+
+.filters__clear:hover { background: rgba(0, 0, 0, 0.05); }
+
+/* --- pagination --- */
+.pager {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--s-3);
+    margin-top: var(--s-6);
+}
+
+.pager__step {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px var(--s-4);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-input);
+    background: var(--surface);
+    color: var(--ink-2);
+    font-size: 14px;
+    font-weight: 600;
+    transition: background var(--tap) var(--ease), color var(--tap) var(--ease);
+}
+
+.pager__step:hover { background: rgba(0, 0, 0, 0.04); color: var(--ink); }
+
+/* A disabled step is still rendered, so the row does not jump sideways
+   when you reach the last page. It must not look clickable. */
+.pager__step.is-off {
+    color: var(--ink-4);
+    background: transparent;
+    cursor: default;
+    pointer-events: none;
+}
+
+.pager__status {
+    font-size: 14px;
+    color: var(--ink-2);
+    padding-inline: var(--s-2);
+}
+
+/* ---------------------------------------------------------------------
+   12c. Login and register
+   ---------------------------------------------------------------------
+   Two columns on desktop: what the site is on the left, the form on the
+   right. On a phone they stack, form first, because that is what the
+   visitor came for.
+   --------------------------------------------------------------------- */
+/* ---------------------------------------------------------------------
+   Login and register
+   ---------------------------------------------------------------------
+   Two columns on desktop: what the site is on the left, the form on the
+   right. On a phone they stack, form first, because that is what the
+   visitor came for.
+
+   The columns are sized so both are the SAME width. When the pitch
+   column was 1fr and the form 520px, the form became much wider than the
+   text beside it and the pair stopped reading as one layout. Equal
+   tracks keep the left edge of the heading and the left edge of the
+   panel on the same optical line.
+   --------------------------------------------------------------------- */
+.auth {
+    display: grid;
+    gap: var(--s-5);
+    padding-block: var(--s-7) var(--s-6);
+    align-items: start;
+}
+
+@media (min-width: 900px) {
+    .auth {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--s-7);
+        padding-block: var(--s-8) var(--s-7);
+    }
+}
+
+.auth__pitch {
+    background-image: radial-gradient(
+        70% 60% at 20% 0%,
+        rgba(255, 140, 23, 0.10) 0%,
+        transparent 62%
+    );
+}
+
+.auth__title {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 4.6vw, 40px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.035em;
+    color: var(--ink);
+}
+
+.auth__lede {
+    margin-top: var(--s-3);
+    max-width: 34ch;
+    font-size: 16px;
+    color: var(--ink-2);
+}
+
+/* The three reasons, as plain ticks rather than a feature grid */
+.auth__points {
+    margin: var(--s-5) 0 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: var(--s-3);
+    max-width: 38ch;
+}
+
+.auth__points li {
+    position: relative;
+    padding-left: 28px;
+    font-size: 14.5px;
+    color: var(--ink-2);
+}
+
+/* A short note under the tick list explaining what stays private */
+.auth__note {
+    margin-top: var(--s-6);
+    padding-top: var(--s-4);
+    border-top: 1px solid var(--hairline);
+    max-width: 38ch;
+    font-size: 13.5px;
+    line-height: 1.65;
+    color: var(--ink-3);
+}
+
+.auth__switch {
+    margin-top: var(--s-4);
+    font-size: 14px;
+    color: var(--ink-2);
+    text-align: center;
+}
+
+.auth__switch a { color: var(--brand-deep); font-weight: 600; }
+.auth__switch a:hover { text-decoration: underline; }
+
+/* ---------------------------------------------------------------------
+   13. Empty state - an invitation to act
+   --------------------------------------------------------------------- */
+.empty {
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-sheet);
+    padding: var(--s-8) var(--s-5);
+    text-align: center;
+}
+
+.empty h2 {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+}
+
+.empty p {
+    margin: var(--s-2) auto 0;
+    max-width: 40ch;
+    color: var(--ink-2);
+}
+
+.empty .btn { margin-top: var(--s-5); }
+
+/* ---------------------------------------------------------------------
+   14. Small shared bits
+   --------------------------------------------------------------------- */
+.backlink {
+    display: inline-block;
+    margin-top: var(--s-5);
+    font-size: 14px;
+    color: var(--ink-2);
+}
+
+.backlink:hover { color: var(--brand); }
+
+.aside-note {
+    margin-top: var(--s-5);
+    padding: var(--s-4);
+    border-radius: var(--r-input);
+    background: var(--surface-2);
+    border: 1px solid var(--hairline-2);
+    font-size: 14px;
+    color: var(--ink-2);
+}
+
+.aside-note strong { color: var(--ink); }
+
+.aside-note code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 13px;
+}
+
+.footer {
+    margin-top: var(--s-7);
+    border-top: 1px solid var(--hairline-2);
+    background: var(--surface);
+}
+
+.footer__inner {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr;
+    gap: var(--s-6);
+    padding: var(--s-7) 0 var(--s-6);
+}
+
+.footer__brand p {
+    margin-top: var(--s-3);
+    max-width: 260px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--ink-3);
+}
+
+.footer__col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-2);
+}
+
+.footer__col h3 {
+    margin-bottom: var(--s-1);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+}
+
+.footer__col a {
+    display: inline-flex;
+    align-items: center;
+    padding-block: var(--s-1);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink-2);
+    text-decoration: none;
+    transition: color var(--tap) var(--ease),
+                transform var(--tap) var(--ease);
+}
+
+.footer__col a:hover {
+    color: var(--brand);
+    transform: translateX(3px);
+}
+
+.footer__bar {
+    padding-bottom: var(--s-5);
+    border-top: 1px solid var(--hairline-2);
+}
+
+.footer__bar p {
+    padding-top: var(--s-4);
+    font-size: 12.5px;
+    color: var(--ink-3);
+}
+
+@media (max-width: 640px) {
+    .footer__inner { grid-template-columns: 1fr; gap: var(--s-5); }
+}
+
+/* =====================================================================
+   15. KEYFRAMES - copied from Keeby's compiled stylesheet
+   ===================================================================== */
+
+/* Keeby: .fade-1 .. .fade-5  (0.7s, staggered 80ms apart) */
+@keyframes fadeUp {
+    0%   { opacity: 0; filter: blur(6px);  transform: translateY(16px); }
+    to   { opacity: 1; filter: blur(0);     transform: translateY(0); }
+}
+
+/* Keeby: .ios-blur-in / .ios-blur-out
+   The transform here must keep the toast's translate(-50%,-50%) centre;
+   a bare translateY would wipe that out for the life of the animation. */
+@keyframes iosBlurIn {
+    0%   { opacity: 0; filter: blur(14px); transform: translate(-50%, 14px); }
+    to   { opacity: 1; filter: blur(0);     transform: translate(-50%, 0); }
+}
+
+/* Keeby: .keeby-shimmer  (4s linear infinite) */
+@keyframes keebyShimmer {
+    0%   { background-position: 180%; }
+    to   { background-position: -80%; }
+}
+
+/* Keeby: .keycap-pop  (.3s cubic-bezier(.34,1.56,.64,1)) */
+@keyframes keycapPop {
+    0%   { opacity: 0; filter: blur(4px); transform: scale(0.5); }
+    40%  { opacity: 1; filter: blur(0);   transform: scale(1.15); }
+    60%  {                    transform: scale(0.95); }
+    to   { opacity: 1; filter: blur(0);   transform: scale(1); }
+}
+
+/* Keeby: .pulse  (2s ease-in-out infinite) */
+@keyframes pulse {
+    50%  { opacity: 0.5; }
+}
+
+/* Keeby: rippleOut */
+@keyframes rippleOut {
+    0%   { opacity: 0.5; transform: scale(0.5); }
+    to   { opacity: 0;   transform: scale(2.5); }
+}
+
+/* Keeby: clickWave */
+@keyframes clickWave {
+    0%   { opacity: 0;   transform: scale(0.7); }
+    30%  { opacity: 0.6; }
+    to   { opacity: 0;   transform: scale(1.1); }
+}
+
+/* Keeby: keebyLoaderPulse */
+@keyframes keebyLoaderPulse {
+    0%, to { filter: saturate(0) opacity(0.3); }
+    50%    { filter: saturate(1) opacity(1); }
+}
+
+/* ---------------------------------------------------------------------
+   16. The one orchestrated page-load moment
+   ---------------------------------------------------------------------
+   Keeby staggers .fade-1 .. .fade-5 across its hero. Same idea here, on
+   the masthead and the sheet - four steps, then it stops.
+
+   "both" fill mode holds the from-state during the delay, so there is no
+   separate opacity:0 to leak if animations never run. Wrapped in
+   prefers-reduced-motion so the content is simply visible when the OS
+   asks for less movement.
+   --------------------------------------------------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+    .rise-1 { animation: 700ms var(--ease) both fadeUp; }
+    .rise-2 { animation: 700ms var(--ease)  80ms both fadeUp; }
+    .rise-3 { animation: 700ms var(--ease) 160ms both fadeUp; }
+    .rise-4 { animation: 700ms var(--ease) 240ms both fadeUp; }
+    .rise-5 { animation: 900ms var(--ease) 320ms both fadeUp; }
+}
+
+/* ---------------------------------------------------------------------
+   17. Reduced motion - the OS setting wins over everything above
+   --------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .btn:active::after,
+    .tile:active .tile__media img,
+    .stepper button:active { transform: none; }
+
+    /* With no animation, drop the gradient entirely and show plain text in
+       the readable brand blue. A frozen mid-gradient would still be
+       orange, and orange is only 2.33:1 on white. */
+    .price--shimmer {
+        animation: none;
+        background-image: none;
+        color: var(--brand);
+        -webkit-text-fill-color: currentColor;
+    }
+}

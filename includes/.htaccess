@@ -1,0 +1,7 @@
+# Block direct browser access to the includes folder.
+#
+# These files are meant to be pulled in by other pages, never opened
+# directly. Without this, someone could visit includes/db.php in the
+# address bar and see your output or error messages.
+
+Require all denied

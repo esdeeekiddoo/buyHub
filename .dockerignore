@@ -1,0 +1,9 @@
+# Don't ship local junk into the image.
+.git
+.gitignore
+Dockerfile
+.dockerignore
+README.md
+reset-items.sql
+.vscode
+*.log

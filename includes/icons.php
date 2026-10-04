@@ -1,0 +1,245 @@
+<?php
+/**
+ * includes/icons.php
+ * ---------------------------------------------------------------------
+ * Inline SVG icons, so the site needs no icon font, no CDN and no extra
+ * HTTP request. The browser draws them at any size, they inherit colour
+ * from the text around them through `currentColor`, and because every
+ * shape is a stroke rather than a fill they can be animated with CSS
+ * alone.
+ *
+ * ICONS: Lucide (lucide.dev), version 1.51.0
+ * Copyright (c) 2026 Lucide Icons and Contributors
+ * SPDX-License-Identifier: ISC
+ *
+ * The ISC licence allows use, copying, modification and distribution for
+ * any purpose, with or without fee. It asks only that this notice travels
+ * with the icons, which is why it sits here instead of in a README.
+ * A handful of icons are inherited from Feather (MIT, Cole Bemis).
+ *
+ * To add an icon: copy the part INSIDE <svg>...</svg> from lucide.dev into
+ * the array below. The wrapper attributes are supplied by icon(), so every
+ * icon ends up the same size, colour and stroke width.
+ */
+
+/**
+ * Renders one icon as inline SVG.
+ *
+ * @param string $name    Key from the array below, e.g. 'shopping-bag'
+ * @param array  $options size   pixels, default 20
+ *                        class  extra CSS classes
+ *                        title  accessible label. Without one the icon is
+ *                               hidden from screen readers, which is what
+ *                               you want beside a text label.
+ */
+function icon(string $name, array $options = []): string
+{
+    $paths = icon_shapes();
+
+    if (!isset($paths[$name])) {
+        return '<!-- unknown icon: ' . htmlspecialchars($name, ENT_QUOTES) . ' -->';
+    }
+
+    $size  = (int) ($options['size'] ?? 20);
+    $class = trim('icon ' . ($options['class'] ?? ''));
+    $title = $options['title'] ?? null;
+
+    $a11y = $title === null
+        ? ' aria-hidden="true" focusable="false"'
+        : ' role="img" aria-label="' . htmlspecialchars($title, ENT_QUOTES) . '"';
+
+    $label = $title === null
+        ? ''
+        : '<title>' . htmlspecialchars($title, ENT_QUOTES) . '</title>';
+
+    /*
+     * pathLength="1" tells the browser to treat every shape as having a
+     * total length of 1, whatever its real size. One CSS rule can then
+     * animate stroke-dashoffset from 1 to 0 and draw every icon correctly,
+     * instead of each path needing its own measured length.
+     */
+    $body = preg_replace(
+        '/<(path|circle|line|rect|polyline|polygon|ellipse)\b/',
+        '<$1 pathLength="1"',
+        $paths[$name]
+    ) ?? $paths[$name];
+
+    return '<svg class="' . htmlspecialchars($class, ENT_QUOTES) . '"'
+         . ' width="' . $size . '" height="' . $size . '"'
+         . ' viewBox="0 0 24 24" fill="none" stroke="currentColor"'
+         . ' stroke-width="2" stroke-linecap="round" stroke-linejoin="round"'
+         . $a11y . '>' . $label . $body . '</svg>';
+}
+
+/** True when that icon name exists, so a view can fall back gracefully. */
+function has_icon(string $name): bool
+{
+    return isset(icon_shapes()[$name]);
+}
+
+/** The raw SVG body of every icon. */
+function icon_shapes(): array
+{
+    static $shapes = null;
+
+    if ($shapes !== null) {
+        return $shapes;
+    }
+
+    $shapes = [
+        'user' => '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+<circle cx="12" cy="7" r="4" />',
+        'user-plus' => '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+<circle cx="9" cy="7" r="4" />
+<line x1="19" x2="19" y1="8" y2="14" />
+<line x1="22" x2="16" y1="11" y2="11" />',
+        'circle-user' => '<circle cx="12" cy="12" r="10" />
+<circle cx="12" cy="10" r="3" />
+<path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662" />',
+        'mail' => '<path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" />
+<rect x="2" y="4" width="20" height="16" rx="2" />',
+        'lock' => '<rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+<path d="M7 11V7a5 5 0 0 1 10 0v4" />',
+        'key' => '<path d="m2 21 9.6-9.6" />
+<path d="m7.5 15.5 2.3 2.3a1 1 0 0 1 0 1.4l-2.1 2.1a1 1 0 0 1-1.4 0L4 19" />
+<circle cx="15.5" cy="7.5" r="5.5" />',
+        'cake' => '<path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8" />
+<path d="M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2.5 2 4 2 2-1 2-1" />
+<path d="M2 21h20" />
+<path d="M7 8v3" />
+<path d="M12 8v3" />
+<path d="M17 8v3" />
+<path d="M7 4h.01" />
+<path d="M12 4h.01" />
+<path d="M17 4h.01" />',
+        'map-pin' => '<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" />
+<circle cx="12" cy="10" r="3" />',
+        'phone' => '<path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384" />',
+        'shield-check' => '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
+<path d="m9 12 2 2 4-4" />',
+        'at-sign' => '<circle cx="12" cy="12" r="4" />
+<path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8" />',
+        'shopping-bag' => '<path d="M16 10a4 4 0 0 1-8 0" />
+<path d="M3.103 6.034h17.794" />
+<path d="M3.4 5.467a2 2 0 0 0-.4 1.2V20a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6.667a2 2 0 0 0-.4-1.2l-2-2.667A2 2 0 0 0 17 2H7a2 2 0 0 0-1.6.8z" />',
+        'shopping-cart' => '<path d="m2.05 2.05 1.099-.028a1 1 0 0 1 1.008.815l2.69 14.347A1 1 0 0 0 7.83 18H18" />
+<path d="M4.563 5h16.435a1 1 0 0 1 .981 1.204l-1.026 6.226A2 2 0 0 1 18.962 14H6.25" />
+<circle cx="18" cy="20" r="2" />
+<circle cx="8" cy="20" r="2" />',
+        'tag' => '<path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" />
+<circle cx="7.5" cy="7.5" r=".5" fill="currentColor" />',
+        'store' => '<path d="M15 21v-5a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v5" />
+<path d="M17.774 10.31a1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.451 0 1.12 1.12 0 0 0-1.548 0 2.5 2.5 0 0 1-3.452 0 1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.77-3.248l2.889-4.184A2 2 0 0 1 7 2h10a2 2 0 0 1 1.653.873l2.895 4.192a2.5 2.5 0 0 1-3.774 3.244" />
+<path d="M4 10.95V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8.05" />',
+        'package' => '<path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z" />
+<path d="M12 22V12" />
+<polyline points="3.29 7 12 12 20.71 7" />
+<path d="m7.5 4.27 9 5.15" />',
+        'trash-2' => '<path d="M10 11v6" />
+<path d="M14 11v6" />
+<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+<path d="M3 6h18" />
+<path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />',
+        'pencil' => '<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
+<path d="m15 5 4 4" />',
+        'image' => '<rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+<circle cx="9" cy="9" r="2" />
+<path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />',
+        'camera' => '<path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z" />
+<circle cx="12" cy="13" r="3" />',
+        'badge-check' => '<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z" />
+<path d="m16 9-5.5 5.5L8 12" />',
+        'handshake' => '<path d="m11 17 2 2a1 1 0 1 0 3-3" />
+<path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4" />
+<path d="m21 3 1 11h-2" />
+<path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3" />
+<path d="M3 4h8" />',
+        'search' => '<path d="m21 21-4.34-4.34" />
+<circle cx="11" cy="11" r="8" />',
+        'search-x' => '<path d="m13.5 8.5-5 5" />
+<path d="m8.5 8.5 5 5" />
+<circle cx="11" cy="11" r="8" />
+<path d="m21 21-4.3-4.3" />',
+        'x' => '<path d="M18 6 6 18" />
+<path d="m6 6 12 12" />',
+        'chevron-down' => '<path d="m6 9 6 6 6-6" />',
+        'chevron-up' => '<path d="m18 15-6-6-6 6" />',
+        'chevron-left' => '<path d="m15 18-6-6 6-6" />',
+        'chevron-right' => '<path d="m9 18 6-6-6-6" />',
+        'chevrons-up-down' => '<path d="m7 15 5 5 5-5" />
+<path d="m7 9 5-5 5 5" />',
+        'layout-grid' => '<rect width="7" height="7" x="3" y="3" rx="1" />
+<rect width="7" height="7" x="14" y="3" rx="1" />
+<rect width="7" height="7" x="14" y="14" rx="1" />
+<rect width="7" height="7" x="3" y="14" rx="1" />',
+        'house' => '<path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
+<path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />',
+        'circle-help' => '<circle cx="12" cy="12" r="10" />
+<path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+<path d="M12 17h.01" />',
+        'info' => '<circle cx="12" cy="12" r="10" />
+<path d="M12 16v-4" />
+<path d="M12 8h.01" />',
+        'loader' => '<path d="M12 2v4" />
+<path d="m16.2 7.8 2.9-2.9" />
+<path d="M18 12h4" />
+<path d="m16.2 16.2 2.9 2.9" />
+<path d="M12 18v4" />
+<path d="m4.9 19.1 2.9-2.9" />
+<path d="M2 12h4" />
+<path d="m4.9 4.9 2.9 2.9" />',
+        'sparkles' => '<path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z" />
+<path d="M20 2v4" />
+<path d="M22 4h-4" />
+<circle cx="4" cy="20" r="2" />',
+        'check' => '<path d="M20 6 9 17l-5-5" />',
+        'circle-check' => '<circle cx="12" cy="12" r="10" />
+<path d="m16 9-5.5 5.5L8 12" />',
+        'circle-alert' => '<circle cx="12" cy="12" r="10" />
+<line x1="12" x2="12" y1="8" y2="12" />
+<line x1="12" x2="12.01" y1="16" y2="16" />',
+        'arrow-up-down' => '<path d="m21 16-4 4-4-4" />
+<path d="M17 20V4" />
+<path d="m3 8 4-4 4 4" />
+<path d="M7 4v16" />',
+        'list-filter' => '<path d="M2 5h20" />
+<path d="M6 12h12" />
+<path d="M9 19h6" />',
+        'funnel' => '<path d="M10 20a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341L21.74 4.67A1 1 0 0 0 21 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z" />',
+        'sliders-horizontal' => '<path d="M10 5H3" />
+<path d="M12 19H3" />
+<path d="M14 3v4" />
+<path d="M16 17v4" />
+<path d="M21 12h-9" />
+<path d="M21 19h-5" />
+<path d="M21 5h-7" />
+<path d="M8 10v4" />
+<path d="M8 12H3" />',
+        'rotate-ccw' => '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+<path d="M3 3v5h5" />',
+        'eye' => '<path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
+<circle cx="12" cy="12" r="3" />',
+        'eye-off' => '<path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49" />
+<path d="M14.084 14.158a3 3 0 0 1-4.242-4.242" />
+<path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143" />
+<path d="m2 2 20 20" />',
+        'log-in' => '<path d="m10 17 5-5-5-5" />
+<path d="M15 12H3" />
+<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />',
+        'log-out' => '<path d="m16 17 5-5-5-5" />
+<path d="M21 12H9" />
+<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />',
+        'venus' => '<path d="M12 15v7" />
+<path d="M9 19h6" />
+<circle cx="12" cy="9" r="6" />',
+        'mars' => '<path d="M16 3h5v5" />
+<path d="m21 3-6.75 6.75" />
+<circle cx="10" cy="14" r="6" />',
+        'calendar' => '<path d="M8 2v3" />
+<path d="M16 2v3" />
+<rect x="3" y="3" width="18" height="18" rx="2" />
+<path d="M3 9h18" />',
+    ];
+
+    return $shapes;
+}
