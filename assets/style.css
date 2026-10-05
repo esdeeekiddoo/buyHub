@@ -848,6 +848,28 @@ dialog.receipt {
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
 }
 
+/* Opening: the panel springs up into place while the backdrop fades in.
+   The [open] attribute is added by showModal(), so this runs on open
+   without any JavaScript. */
+dialog.receipt[open] {
+    animation: dialogPop 300ms var(--spring) both;
+}
+
+dialog.receipt[open]::backdrop {
+    animation: backdropIn 240ms var(--ease) both;
+}
+
+/* Closing: a short, calm exit. The JS adds .is-closing, waits for the
+   animation to finish, then calls close() - so the dialog does not just
+   blink out of existence. */
+dialog.receipt.is-closing {
+    animation: dialogOut 180ms var(--ease) both;
+}
+
+dialog.receipt.is-closing::backdrop {
+    animation: backdropOut 180ms var(--ease) both;
+}
+
 dialog.receipt::backdrop { background: rgba(23, 23, 23, 0.45); }
 
 .receipt__head {
@@ -1960,6 +1982,28 @@ dialog.receipt::backdrop { background: rgba(23, 23, 23, 0.45); }
 @keyframes photoLoaderPulse {
     0%, to { filter: saturate(0) opacity(0.3); }
     50%    { filter: saturate(1) opacity(1); }
+}
+
+/* Receipt dialog: a soft spring-up on open, a calm fade on close, with
+   the backdrop fading in step. */
+@keyframes dialogPop {
+    0%   { opacity: 0; transform: translateY(14px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
+
+@keyframes dialogOut {
+    0%   { opacity: 1; transform: translateY(0)   scale(1); }
+    to   { opacity: 0; transform: translateY(8px) scale(0.98); }
+}
+
+@keyframes backdropIn {
+    0%   { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes backdropOut {
+    0%   { opacity: 1; }
+    to   { opacity: 0; }
 }
 
 /* ---------------------------------------------------------------------

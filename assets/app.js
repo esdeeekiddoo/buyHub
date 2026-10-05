@@ -295,24 +295,52 @@
         return dialog && typeof dialog.showModal === 'function';
     };
 
+    /* Close with a short exit animation. The class triggers the CSS, and
+       we wait for it to finish before calling close() so the dialog does
+       not blink out. The timeout is a fallback in case animationend never
+       fires (e.g. the tab is backgrounded). */
+    var closeAnimated = function (dialog) {
+        if (!dialog || !dialog.open || dialog.classList.contains('is-closing')) {
+            return;
+        }
+        dialog.classList.add('is-closing');
+
+        var done = function () {
+            dialog.classList.remove('is-closing');
+            dialog.close();
+        };
+
+        dialog.addEventListener('animationend', function (event) {
+            if (event.animationName === 'dialogOut') { done(); }
+        }, { once: true });
+
+        window.setTimeout(done, 220);
+    };
+
     document.querySelectorAll('[data-receipt]').forEach(function (button) {
         button.addEventListener('click', function () {
             var dialog = document.getElementById(button.getAttribute('data-receipt'));
-            if (dialogSupported(dialog)) { dialog.showModal(); }
+            if (dialogSupported(dialog) && !dialog.open) { dialog.showModal(); }
         });
     });
 
     document.querySelectorAll('[data-receipt-close]').forEach(function (button) {
         button.addEventListener('click', function () {
-            var dialog = button.closest('dialog');
-            if (dialog) { dialog.close(); }
+            closeAnimated(button.closest('dialog'));
         });
     });
 
     /* Click the dimmed area outside the panel to close it. */
     document.querySelectorAll('dialog.receipt').forEach(function (dialog) {
         dialog.addEventListener('click', function (event) {
-            if (event.target === dialog) { dialog.close(); }
+            if (event.target === dialog) { closeAnimated(dialog); }
+        });
+
+        /* Escape closes the dialog natively, bypassing our animation.
+           Intercept it, play the exit, then close. */
+        dialog.addEventListener('cancel', function (event) {
+            event.preventDefault();
+            closeAnimated(dialog);
         });
     });
 })();
