@@ -1,8 +1,25 @@
 # --- Base image: PHP 8.2 on Apache ---
 FROM php:8.2-apache
 
-# PDO MySQL driver, plus GD for resizing uploads before they are stored.
-RUN docker-php-ext-install pdo_mysql gd
+# The database driver the app needs. Installed first, on its own, because
+# nothing works without it.
+RUN docker-php-ext-install pdo_mysql
+
+# GD is used to resize uploads before they are stored. It needs these
+# system libraries to compile (JPEG, PNG/zlib, WEBP and FreeType support).
+# If this step ever fails, the build still succeeds - the upload code
+# falls back to storing the original image untouched.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        libjpeg62-turbo-dev \
+        libpng-dev \
+        zlib1g-dev \
+        libwebp-dev \
+        libfreetype6-dev \
+    && docker-php-ext-configure gd --with-jpeg --with-webp --with-freetype \
+    && docker-php-ext-install gd \
+    && rm -rf /var/lib/apt/lists/* \
+    || echo "GD not installed - uploads will be stored at original size"
 
 # Copy the whole project into the web root
 COPY . /var/www/html/
