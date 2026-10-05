@@ -62,12 +62,11 @@ $flash = show_flash();
         <nav class="nav" id="main-nav" aria-label="Main">
             <!-- Centre zone: the browsing and shopping links. -->
             <div class="nav__group nav__group--center">
-                <a class="nav__link" href="<?= e(page_url('browse.php')) ?>">
-                    <?= icon('layout-grid', ['size' => 17]) ?>
-                    <span>Browse</span>
-                </a>
-
                 <?php if (is_logged_in()): ?>
+                    <a class="nav__link" href="<?= e(page_url('browse.php')) ?>">
+                        <?= icon('layout-grid', ['size' => 17]) ?>
+                        <span>Browse</span>
+                    </a>
                     <a class="nav__link" href="<?= e(page_url('add-item.php')) ?>">
                         <?= icon('shopping-bag', ['size' => 17]) ?>
                         <span>Sell an item</span>
