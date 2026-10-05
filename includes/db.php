@@ -38,8 +38,8 @@ function db(): PDO
         try {
             $dsn = "mysql:host=$host;port=" . $config['db']['port'] . ";dbname=$name;charset=utf8mb4";
 
-            // Hosted MySQL (like Aiven) REFUSES plain connections, so add
-            // sslmode=require when DB_SSL=true.
+            // Some database servers require SSL, so add sslmode=require
+            // when DB_SSL is on.
             if (isset($config['db']['ssl']) && $config['db']['ssl'] === true) {
                 $dsn .= ';sslmode=require';
             }
@@ -56,6 +56,10 @@ function db(): PDO
                     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                     // Use real prepared statements (stronger injection defence)
                     PDO::ATTR_EMULATE_PREPARES => false,
+                    // Reuse the connection across requests. On a remote
+                    // database the TLS handshake is a large part of every
+                    // page's time, so keeping the socket open saves it.
+                    PDO::ATTR_PERSISTENT => true,
                 ]
             );
         } catch (PDOException $e) {

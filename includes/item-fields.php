@@ -31,6 +31,7 @@ $photo_optional      = !empty($allow_no_photo);
     <div class="control">
         <?= icon('tag', ['size' => 18, 'class' => 'control__icon']) ?>
         <input type="text" id="title" name="title" maxlength="120" required
+               placeholder="Blue office chair, size M"
                value="<?= e($current_title) ?>">
     </div>
     <p class="help">Name the thing and the size. "Blue office chair" beats "Chair".</p>
@@ -41,6 +42,7 @@ $photo_optional      = !empty($allow_no_photo);
     <div class="control control--area">
         <?= icon('info', ['size' => 18, 'class' => 'control__icon control__icon--top']) ?>
         <textarea id="description" name="description" rows="5"
+                  placeholder="Condition, size, and why you are letting it go."
                   required><?= e($current_description) ?></textarea>
     </div>
     <p class="help">Condition, size, and why you are letting it go.</p>
@@ -52,6 +54,7 @@ $photo_optional      = !empty($allow_no_photo);
         <div class="control">
             <?= icon('tag', ['size' => 18, 'class' => 'control__icon']) ?>
             <input type="number" id="price" name="price" min="0" step="0.01" required
+                   placeholder="0.00"
                    value="<?= e($current_price) ?>">
         </div>
     </div>
@@ -62,6 +65,7 @@ $photo_optional      = !empty($allow_no_photo);
             <?= icon('package', ['size' => 18, 'class' => 'control__icon']) ?>
             <input type="number" id="stock" name="stock"
                    min="<?= $photo_optional ? '0' : '1' ?>" step="1" required
+                   placeholder="1"
                    value="<?= e($current_stock) ?>">
         </div>
         <p class="help">
@@ -82,10 +86,13 @@ $photo_optional      = !empty($allow_no_photo);
     <p class="help">
         JPG, PNG or WEBP, up to 3 MB.
         <?php if ($photo_optional && $current_photo !== ''): ?>
-            <br>Current photo: <code><?= e($current_photo) ?></code>.
-            Leave this empty to keep it.
+            <br>Leave this empty to keep the current photo.
         <?php endif; ?>
     </p>
+    <?php if ($photo_optional && $current_photo !== '' && !empty($item['id'])): ?>
+        <img class="field-photo" src="image.php?id=<?= (int) $item['id'] ?>"
+             alt="Current photo" loading="lazy">
+    <?php endif; ?>
 </div>
 
 <div class="form-actions">

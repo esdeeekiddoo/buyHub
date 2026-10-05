@@ -1,16 +1,11 @@
 -- =====================================================================
---  Mini Marketplace - database setup
+--  BuyHub - database setup
 --  ---------------------------------------------------------------------
 --  HOW TO RUN THIS
---    Option A (easiest): open phpMyAdmin at http://localhost/phpmyadmin,
---        click the "Import" tab, choose this file, press Go.
+--    Option A (easiest): open phpMyAdmin, click the "Import" tab,
+--        choose this file, press Go.
 --    Option B (command line):
 --        mysql -u root < database.sql
---
---  Demo logins after importing (password for all three: password123)
---    aisyah@example.com
---    weiming@example.com
---    siti@example.com
 -- =====================================================================
 
 DROP DATABASE IF EXISTS marketplace;
@@ -83,8 +78,9 @@ CREATE TABLE items (
     -- "sold out", and the home page query filters those out automatically.
     stock       INT            NOT NULL DEFAULT 1,
 
-    -- Filename only, e.g. "a3f9c1b2....jpg". The file lives in /uploads.
-    -- NULL means the item was posted without a photo.
+    -- A marker that this item has a photo. The bytes themselves live in
+    -- item_photos. It is 'db' for uploaded photos, or an old file name in
+    -- /uploads for the sample data. NULL means no photo.
     photo       VARCHAR(255)   DEFAULT NULL,
 
     created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -101,6 +97,25 @@ CREATE INDEX idx_items_created ON items (created_at);
 
 
 -- ---------------------------------------------------------------------
+--  item_photos - the actual photo bytes, one row per item
+--
+--  Photos live here rather than as files in /uploads because the free
+--  host's filesystem is ephemeral: a file on disk is wiped on restart
+--  while the database row survives, which leaves a broken image. Bytes
+--  stored next to their row survive together.
+-- ---------------------------------------------------------------------
+CREATE TABLE item_photos (
+    item_id   INT PRIMARY KEY,
+    mime      VARCHAR(50)  NOT NULL,
+    data      MEDIUMBLOB   NOT NULL,
+
+    CONSTRAINT fk_photos_item
+        FOREIGN KEY (item_id) REFERENCES items (id)
+        ON DELETE CASCADE
+) ENGINE = InnoDB;
+
+
+-- ---------------------------------------------------------------------
 --  cart_items - a shopper's pending basket
 --
 --  One row per (user, item). quantity is the amount they plan to buy;
@@ -113,7 +128,7 @@ CREATE TABLE cart_items (
     user_id   INT NOT NULL,
     item_id   INT NOT NULL,
     quantity  INT NOT NULL DEFAULT 1,
-
+        
     CONSTRAINT fk_cart_user
         FOREIGN KEY (user_id) REFERENCES users (id)
         ON DELETE CASCADE,
@@ -137,6 +152,10 @@ CREATE TABLE cart_items (
 CREATE TABLE purchases (
     id           INT AUTO_INCREMENT PRIMARY KEY,
 
+    -- One id shared by every line of the same checkout, so "My orders"
+    -- can group them into one receipt.
+    order_id     CHAR(33)     DEFAULT NULL,
+
     user_id      INT NOT NULL,
     item_id      INT          DEFAULT NULL,
 
@@ -154,16 +173,17 @@ CREATE TABLE purchases (
         ON DELETE SET NULL
 ) ENGINE = InnoDB;
 
-CREATE INDEX idx_purchases_user ON purchases (user_id);
+CREATE INDEX idx_purchases_user  ON purchases (user_id);
+CREATE INDEX idx_purchases_order ON purchases (order_id);
 
 
 -- =====================================================================
 --  SAMPLE DATA - so the site is not empty on your first run
 -- =====================================================================
 
--- The password for all three is password123. That hash was produced by
--- password_hash('password123', PASSWORD_DEFAULT) - you cannot work it out
--- by hand, which is the whole point of storing a hash.
+-- Sample accounts, so the site is not empty on a fresh install. Their
+-- passwords are stored only as hashes - the whole point of storing a
+-- hash is that the password cannot be read back out of the database.
 INSERT INTO users
   (first_name, last_name, email, password_hash, birth_date, phone, gender, city) VALUES
 ('Aisyah', 'Rahman', 'aisyah@example.com',

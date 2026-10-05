@@ -14,7 +14,7 @@ require_once __DIR__ . '/includes/icons.php';
 $item_id = (int) ($_GET['id'] ?? 0);
 
 $stmt = db()->prepare(
-    'SELECT items.*, users.first_name, users.last_name, users.city, users.birth_date
+    'SELECT items.*, users.first_name, users.last_name, users.city
        FROM items
        JOIN users ON users.id = items.user_id
       WHERE items.id = ?
@@ -44,8 +44,8 @@ include __DIR__ . '/includes/header.php';
     <div class="detail">
 
         <div class="detail__media">
-            <?php if (!empty($item['photo'])): ?>
-                <img src="uploads/<?= e($item['photo']) ?>" alt="<?= e($item['title']) ?>">
+            <?php if (item_photo_url($item) !== null): ?>
+                <img src="<?= e(item_photo_url($item)) ?>" alt="<?= e($item['title']) ?>">
             <?php else: ?>
                 <span class="tile__photo-missing">No photo</span>
             <?php endif; ?>
@@ -77,10 +77,6 @@ include __DIR__ . '/includes/header.php';
                             Listed on
                         <?php endif; ?>
                         <?= e(date('j M Y', strtotime($item['created_at']))) ?>
-                        <?php $sellerAge = age_from($item['birth_date'] ?? null); ?>
-                        <?php if ($sellerAge !== null): ?>
-                            &middot; age <?= (int) $sellerAge ?>
-                        <?php endif; ?>
                     </p>
                 </div>
             </div>
@@ -112,7 +108,6 @@ include __DIR__ . '/includes/header.php';
                                    aria-label="Quantity">
                             <button type="button" data-step="1" aria-label="One more">+</button>
                         </div>
-                        <p class="stepper__max">Up to <?= (int) $item['stock'] ?> available.</p>
 
                         <button type="submit" class="btn btn--block">
                             <?= icon('shopping-cart', ['size' => 18]) ?>

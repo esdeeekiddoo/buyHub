@@ -41,12 +41,18 @@ if (!filter_var($stock, FILTER_VALIDATE_INT) || (int) $stock < 1) {
 }
 
 // ---- 3. Handle the photo ----
-$photo = null;
+$photo      = null;
+$photo_data = null;
+$photo_mime = null;
 
-[$photo, $photo_error] = save_photo($_FILES['photo'] ?? null);
+[$photo_data, $photo_mime, $photo_error] = save_photo($_FILES['photo'] ?? null);
 
 if ($photo_error !== null) {
     $errors[] = $photo_error;
+} else {
+    // A tiny marker so the row records "this item has a photo", while the
+    // bytes themselves live in item_photos. It is not a real file name.
+    $photo = 'db';
 }
 
 // ---- 4. Anything wrong? Back to the form ----
@@ -73,6 +79,16 @@ $stmt->execute([
     (int) $stock,
     $photo,
 ]);
+
+$item_id = (int) db()->lastInsertId();
+
+// The bytes go in their own table, keyed by item. One row per item.
+if ($photo_data !== null && $photo_mime !== null) {
+    $stmt = db()->prepare(
+        'INSERT INTO item_photos (item_id, mime, data) VALUES (?, ?, ?)'
+    );
+    $stmt->execute([$item_id, $photo_mime, $photo_data]);
+}
 
 flash('Your item "' . $title . '" is now live!');
 redirect('my-items.php');

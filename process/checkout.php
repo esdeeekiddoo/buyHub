@@ -33,6 +33,7 @@ if ($rows === []) {
 
 $purchased = 0;
 $blocked   = [];
+$order_id  = new_order_id();   // one receipt for this whole checkout
 
 foreach ($rows as $row) {
     $quantity = min((int) $row['quantity'], (int) $row['stock']);
@@ -57,10 +58,10 @@ foreach ($rows as $row) {
 
     // Record the sale as a purchase, then clear it from the cart.
     $stmt = db()->prepare(
-        'INSERT INTO purchases (user_id, item_id, title, unit_price, quantity)
-         VALUES (?, ?, ?, ?, ?)'
+        'INSERT INTO purchases (order_id, user_id, item_id, title, unit_price, quantity)
+         VALUES (?, ?, ?, ?, ?, ?)'
     );
-    $stmt->execute([$_SESSION['user_id'], $row['item_id'], $row['title'], $row['price'], $quantity]);
+    $stmt->execute([$order_id, $_SESSION['user_id'], $row['item_id'], $row['title'], $row['price'], $quantity]);
 
     $stmt = db()->prepare('DELETE FROM cart_items WHERE id = ?');
     $stmt->execute([$row['cart_id']]);

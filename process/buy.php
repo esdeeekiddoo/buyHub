@@ -84,10 +84,10 @@ $total = (float) $item['stock'] - $quantity;   // only used for the message
 // price are SNAPSHOTS: if the seller later edits or deletes the listing,
 // the record of this sale keeps the values that were real at buy time.
 $stmt = db()->prepare(
-    'INSERT INTO purchases (user_id, item_id, title, unit_price, quantity)
-     VALUES (?, ?, ?, ?, ?)'
+    'INSERT INTO purchases (order_id, user_id, item_id, title, unit_price, quantity)
+     VALUES (?, ?, ?, ?, ?, ?)'
 );
-$stmt->execute([$_SESSION['user_id'], $item_id, $item['title'], $item['price'], $quantity]);
+$stmt->execute([new_order_id(), $_SESSION['user_id'], $item_id, $item['title'], $item['price'], $quantity]);
 
 flash(
     'Bought ' . $quantity . ' x "' . $item['title'] . '". '

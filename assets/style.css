@@ -1,11 +1,10 @@
 /* =====================================================================
-   Mini Marketplace - design system
+   BuyHub - design system
    ---------------------------------------------------------------------
-   Palette, motion timings and easing are lifted from Keeby
-   (getkeeby.com) - its compiled stylesheet, not a guess:
-     neutrals #f5f5f5 / #171717 / #444444   (Keeby)
-     brand    #df280c                       (Shopee orange, darkened to pass AA)
-     easing cubic-bezier(.4,0,.2,1) | tap 150ms   (Keeby)
+   Palette, motion timings and easing are shared across the interface:
+     neutrals #f5f5f5 / #171717 / #444444
+     brand    #df280c                       (orange, darkened to pass AA)
+     easing cubic-bezier(.4,0,.2,1) | tap 150ms
 
    Typography roles:
      Nunito  -> display + prices (rounded, friendly, the loud voice)
@@ -22,7 +21,7 @@
    --------------------------------------------------------------------- */
 :root {
     /* --- neutral surfaces --- */
-    --paper:     #f5f5f5;                 /* body background (Keeby) */
+    --paper:     #f5f5f5;                 /* body background  */
     --surface:   #ffffff;
     --surface-2: #f7f7f8;
 
@@ -32,7 +31,7 @@
     --ink-3:     #8a8a8a;                 /*  3.5:1 - large text / decorative */
     --ink-4:     #d6d6d6;                 /*  1.6:1 - borders and empty space only */
 
-    /* --- hairlines: Keeby uses alpha black, not grey ---
+    /* --- hairlines: uses alpha black, not grey ---
        #0000001a = 10% black, #0000000d = 5% black */
     --hairline:   rgba(0, 0, 0, 0.10);
     --hairline-2: rgba(0, 0, 0, 0.05);
@@ -51,7 +50,7 @@
     --brand-soft:  rgba(223, 40, 12, 0.08);
     --brand-vivid: #f4511e;               /* Shopee-bright: fills and 24px+ text */
 
-    /* Keeby's own orange, kept for the shimmer sweep and the warm glow */
+    /* warm orange accent, kept for the shimmer sweep and the warm glow */
     --accent:      #ff8c17;
     --accent-lt:   #ffa743;
     --accent-soft: rgba(255, 140, 23, 0.10);
@@ -81,10 +80,10 @@
        cramped - do not add borders or shadows, which double the edges. */
     --tile-gap: var(--s-3);
 
-    /* --- motion: Keeby's own easing and tap duration --- */
+    /* --- motion: own easing and tap duration --- */
     --ease: cubic-bezier(0.4, 0, 0.2, 1);      /* --default-transition-timing-function */
-    --ease-out: cubic-bezier(0.22, 1, 0.36, 1); /* Keeby's .ios-blur-in curve */
-    --spring: cubic-bezier(0.34, 1.56, 0.64, 1); /* Keeby's .keycap-pop overshoot */
+    --ease-out: cubic-bezier(0.22, 1, 0.36, 1); /* .ios-blur-in curve */
+    --spring: cubic-bezier(0.34, 1.56, 0.64, 1); /* .keycap-pop overshoot */
     --tap: 150ms;                                /* --default-transition-duration */
 
     --page-max: 1120px;
@@ -97,6 +96,11 @@
 
 body {
     margin: 0;
+    /* Column flexbox so <main> can grow and the footer always sits at the
+       bottom, even on a short page like an empty cart or orders list. */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
     background: var(--paper);
     /* The faded orange glow runs site-wide. The centre is randomised on
        every page render in includes/header.php (via --glow-x / --glow-y).
@@ -147,6 +151,10 @@ a { color: inherit; text-decoration: none; }
     padding-inline: var(--s-4);
 }
 
+/* <main> is a direct child of the flex body, so letting it grow pushes
+   the footer to the bottom of the viewport on short pages. */
+main.wrap { flex: 1 0 auto; }
+
 @media (min-width: 720px) {
     .wrap { padding-inline: var(--s-5); }
 }
@@ -158,7 +166,7 @@ a { color: inherit; text-decoration: none; }
     position: sticky;
     top: 0;
     z-index: 20;
-    /* Keeby uses saturate(150%) + blur on its sticky surfaces */
+    /* uses saturate(150%) + blur on its sticky surfaces */
     background: rgba(245, 245, 245, 0.82);
     -webkit-backdrop-filter: saturate(150%) blur(18px);
     backdrop-filter: saturate(150%) blur(18px);
@@ -185,11 +193,30 @@ a { color: inherit; text-decoration: none; }
 
 .wordmark:hover { color: var(--brand); }
 
+/* The nav owns the space after the wordmark. Inside it, the centre group
+   takes the room so its links sit centred, and the end group hugs the
+   right edge with the account controls. */
 .nav {
+    flex: 1;
     display: flex;
     align-items: center;
     gap: var(--s-2);
     flex-wrap: wrap;
+}
+
+.nav__group {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+}
+
+.nav__group--center {
+    flex: 1;
+    justify-content: center;
+}
+
+.nav__group--end {
+    justify-content: flex-end;
 }
 
 /* Links and buttons now hold an icon plus a label, so they need to be
@@ -294,6 +321,14 @@ a { color: inherit; text-decoration: none; }
         border-radius: var(--r-input);
     }
 
+    /* Inside the stacked panel the two zones become plain full-width rows
+       stacked on top of each other. */
+    .js .nav__group {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 2px;
+    }
+
     .js .nav .nav__link:hover { background: rgba(0, 0, 0, 0.05); }
 
     .js .nav .inline-form { width: 100%; }
@@ -313,7 +348,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ---------------------------------------------------------------------
-   5. Buttons - with Keeby's rippleOut on press
+   5. Buttons - with rippleOut on press
    --------------------------------------------------------------------- */
 .btn {
     position: relative;
@@ -340,7 +375,7 @@ a { color: inherit; text-decoration: none; }
 
 .btn:hover { background: var(--brand-dark); }
 
-/* Keeby's ripple: a circle expands from the centre and fades out.
+/* ripple: a circle expands from the centre and fades out.
    This is motion that answers a press, so it is allowed. */
 .btn::after {
     content: "";
@@ -398,11 +433,11 @@ a { color: inherit; text-decoration: none; }
 .btn--small span { white-space: nowrap; }
 
 /* ---------------------------------------------------------------------
-   6. Masthead - Keeby's orange radial glow, straight from its CSS
+   6. Masthead - orange radial glow
    --------------------------------------------------------------------- */
 .masthead {
     padding: var(--s-7) 0 var(--s-6);
-    /* The faded Keeby radial glow now lives on <body> for every page,
+    /* The faded radial glow now lives on <body> for every page,
        so nothing extra is drawn here - that would double it up. */
 }
 
@@ -489,7 +524,7 @@ a { color: inherit; text-decoration: none; }
 
 .tile:active .tile__media img { transform: scale(0.975); }
 
-/* Keeby's keebyLoaderPulse: a slot with no image breathes instead of
+/* photoLoaderPulse: a slot with no image breathes instead of
    sitting dead. */
 .tile__photo-missing {
     width: 100%;
@@ -498,7 +533,7 @@ a { color: inherit; text-decoration: none; }
     place-items: center;
     font-size: 13px;
     color: var(--ink-3);
-    animation: keebyLoaderPulse 1.3s var(--ease) infinite;
+    animation: photoLoaderPulse 1.3s var(--ease) infinite;
 }
 
 .tile__body {
@@ -543,7 +578,7 @@ a { color: inherit; text-decoration: none; }
     color: var(--brand-vivid);
 }
 
-/* Keeby's signature shimmer: an orange gradient sweeping through the
+/* signature shimmer: an orange gradient sweeping through the
    glyphs. Applied to exactly one element - the price on the item page.
    background-clip:text is widely supported but not everywhere, so the
    solid colour above stays as the fallback. */
@@ -555,7 +590,7 @@ a { color: inherit; text-decoration: none; }
         background-clip: text;
         color: transparent;
         -webkit-text-fill-color: transparent;
-        animation: 4s linear infinite keebyShimmer;
+        animation: 4s linear infinite priceShimmer;
     }
 }
 
@@ -569,7 +604,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ---------------------------------------------------------------------
-   9. Toast - Keeby's .ios-blur-in, on a dark #171717 pill
+   9. Toast - .ios-blur-in, on a dark #171717 pill
    --------------------------------------------------------------------- */
 .toast {
     position: fixed;
@@ -638,7 +673,7 @@ a { color: inherit; text-decoration: none; }
     white-space: pre-line;
 }
 
-/* Stock state as a dot plus words. Keeby's orange marks the scarce ones,
+/* Stock state as a dot plus words. orange marks the scarce ones,
    its blue marks the healthy ones. */
 .status {
     display: inline-flex;
@@ -660,7 +695,7 @@ a { color: inherit; text-decoration: none; }
 
 .status--low::before {
     background: var(--danger);
-    animation: pulse 2s ease-in-out infinite;   /* Keeby's pulse */
+    animation: pulse 2s ease-in-out infinite;   /* pulse */
 }
 
 .status--gone::before { background: var(--ink-4); }
@@ -678,6 +713,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* The buy and add-to-cart buttons line up vertically under the stepper. */
+.detail__action .stepper + .btn--block { margin-top: var(--s-3); }
 .detail__action form .btn--block + .btn--block {
     margin-top: var(--s-2);
 }
@@ -710,7 +746,7 @@ a { color: inherit; text-decoration: none; }
 .stepper button:hover { background: rgba(0, 0, 0, 0.05); }
 .stepper button:active { transform: scale(0.9); }
 
-/* Keeby's keycapPop: a spring overshoot when the number changes */
+/* keycapPop: a spring overshoot when the number changes */
 .stepper input {
     width: 56px;
     height: 38px;
@@ -729,18 +765,12 @@ a { color: inherit; text-decoration: none; }
 
 .stepper input:focus { outline: none; }
 
-/* Keeby's .keycap-pop curve, applied through the spring token */
+/* .keycap-pop curve, applied through the spring token */
 .stepper.is-bumped input { animation: 300ms var(--spring) both keycapPop; }
 
 .stepper:focus-within {
     outline: 2px solid var(--brand);
     outline-offset: 2px;
-}
-
-.stepper__max {
-    margin-top: var(--s-2);
-    font-size: 13px;
-    color: var(--ink-3);
 }
 
 /* ---------------------------------------------------------------------
@@ -800,6 +830,112 @@ a { color: inherit; text-decoration: none; }
 }
 
 .row__actions { display: flex; gap: var(--s-1); }
+
+/* ---------------------------------------------------------------------
+   11b. Receipt modal
+   ---------------------------------------------------------------------
+   A native <dialog>, so focus trapping, Escape-to-close and the backdrop
+   come from the browser. Without JavaScript the dialog stays closed; the
+   order total is already visible on the row, so nothing is lost.
+   --------------------------------------------------------------------- */
+dialog.receipt {
+    width: min(560px, calc(100vw - 32px));
+    padding: 0;
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-sheet);
+    background: var(--surface);
+    color: var(--ink-2);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
+}
+
+dialog.receipt::backdrop { background: rgba(23, 23, 23, 0.45); }
+
+.receipt__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--s-4);
+    padding: var(--s-5) var(--s-5) 0;
+}
+
+.receipt__label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+}
+
+.receipt__no {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+}
+
+.receipt__close {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    flex: none;
+    border: none;
+    border-radius: 50%;
+    background: none;
+    color: var(--ink-3);
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background var(--tap) var(--ease), color var(--tap) var(--ease);
+}
+
+.receipt__close:hover { background: rgba(0, 0, 0, 0.05); color: var(--ink); }
+
+.receipt__date {
+    padding: 0 var(--s-5);
+    font-size: 13px;
+    color: var(--ink-3);
+}
+
+.receipt__table {
+    width: 100%;
+    margin-top: var(--s-4);
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.receipt__table th,
+.receipt__table td {
+    padding: var(--s-3) var(--s-5);
+    text-align: left;
+}
+
+.receipt__table th {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    border-bottom: 1px solid var(--hairline);
+}
+
+.receipt__table td:not(:first-child),
+.receipt__table th:not(:first-child) { text-align: right; }
+
+.receipt__table tbody tr { border-bottom: 1px solid var(--hairline-2); }
+
+.receipt__table tfoot td {
+    padding-top: var(--s-4);
+    font-weight: 600;
+    color: var(--ink);
+}
+
+.receipt__note {
+    padding: var(--s-4) var(--s-5) var(--s-5);
+    font-size: 13px;
+    color: var(--ink-3);
+}
 
 /* ---------------------------------------------------------------------
    12. Forms
@@ -936,6 +1072,17 @@ a { color: inherit; text-decoration: none; }
     padding: 1px 5px;
     border-radius: 4px;
     word-break: break-all;
+}
+
+/* A small preview of the photo already attached to an item, so editing
+   shows what will be kept when the file box is left empty. */
+.field-photo {
+    width: 120px;
+    height: 120px;
+    margin-top: var(--s-3);
+    border-radius: var(--r-input);
+    border: 1px solid var(--hairline);
+    object-fit: cover;
 }
 
 /* A pair of fields side by side. gap does the spacing in BOTH
@@ -1760,16 +1907,16 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* =====================================================================
-   15. KEYFRAMES - copied from Keeby's compiled stylesheet
+   15. KEYFRAMES
    ===================================================================== */
 
-/* Keeby: .fade-1 .. .fade-5  (0.7s, staggered 80ms apart) */
+/* .fade-1 .. .fade-5  (0.7s, staggered 80ms apart) */
 @keyframes fadeUp {
     0%   { opacity: 0; filter: blur(6px);  transform: translateY(16px); }
     to   { opacity: 1; filter: blur(0);     transform: translateY(0); }
 }
 
-/* Keeby: .ios-blur-in / .ios-blur-out
+/* .ios-blur-in / .ios-blur-out
    The transform here must keep the toast's translate(-50%,-50%) centre;
    a bare translateY would wipe that out for the life of the animation. */
 @keyframes iosBlurIn {
@@ -1777,13 +1924,13 @@ a { color: inherit; text-decoration: none; }
     to   { opacity: 1; filter: blur(0);     transform: translate(-50%, 0); }
 }
 
-/* Keeby: .keeby-shimmer  (4s linear infinite) */
-@keyframes keebyShimmer {
+/* price shimmer  (4s linear infinite) */
+@keyframes priceShimmer {
     0%   { background-position: 180%; }
     to   { background-position: -80%; }
 }
 
-/* Keeby: .keycap-pop  (.3s cubic-bezier(.34,1.56,.64,1)) */
+/* .keycap-pop  (.3s cubic-bezier(.34,1.56,.64,1)) */
 @keyframes keycapPop {
     0%   { opacity: 0; filter: blur(4px); transform: scale(0.5); }
     40%  { opacity: 1; filter: blur(0);   transform: scale(1.15); }
@@ -1791,26 +1938,26 @@ a { color: inherit; text-decoration: none; }
     to   { opacity: 1; filter: blur(0);   transform: scale(1); }
 }
 
-/* Keeby: .pulse  (2s ease-in-out infinite) */
+/* .pulse  (2s ease-in-out infinite) */
 @keyframes pulse {
     50%  { opacity: 0.5; }
 }
 
-/* Keeby: rippleOut */
+/* rippleOut */
 @keyframes rippleOut {
     0%   { opacity: 0.5; transform: scale(0.5); }
     to   { opacity: 0;   transform: scale(2.5); }
 }
 
-/* Keeby: clickWave */
+/* clickWave */
 @keyframes clickWave {
     0%   { opacity: 0;   transform: scale(0.7); }
     30%  { opacity: 0.6; }
     to   { opacity: 0;   transform: scale(1.1); }
 }
 
-/* Keeby: keebyLoaderPulse */
-@keyframes keebyLoaderPulse {
+/* photoLoaderPulse */
+@keyframes photoLoaderPulse {
     0%, to { filter: saturate(0) opacity(0.3); }
     50%    { filter: saturate(1) opacity(1); }
 }
@@ -1818,8 +1965,7 @@ a { color: inherit; text-decoration: none; }
 /* ---------------------------------------------------------------------
    16. The one orchestrated page-load moment
    ---------------------------------------------------------------------
-   Keeby staggers .fade-1 .. .fade-5 across its hero. Same idea here, on
-   the masthead and the sheet - four steps, then it stops.
+   Four staggered steps across the masthead and the sheet, then it stops.
 
    "both" fill mode holds the from-state during the delay, so there is no
    separate opacity:0 to leak if animations never run. Wrapped in

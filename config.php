@@ -5,21 +5,19 @@
  * All the settings live here, so if the database password changes you
  * only edit this one file and not 20 other files.
  *
- * Laragon's default MySQL settings are used below (root / no password).
+ * The defaults below match a standard local MySQL (root / no password).
  */
 
 $config = [
-    // In production (Render) these come from environment variables.
-    // Locally they fall back to Laragon's defaults, so nothing changes
-    // for local dev.
+    // Database settings. These can come from environment variables, or
+    // fall back to sensible local defaults (root / no password).
     'db' => [
         'host' => getenv('DB_HOST') ?: '127.0.0.1',
         'port' => getenv('DB_PORT') ?: '3306',
         'name' => getenv('DB_NAME') ?: 'marketplace',
         'user' => getenv('DB_USER') ?: 'root',
         'pass' => getenv('DB_PASS') ?: '',
-        // Hosted MySQL (Aiven, Railway, ...) usually requires SSL on.
-        //   DB_SSL=true  -> append ;sslmode=require to the DSN
+        // Set DB_SSL=true when the database server requires SSL.
         'ssl'  => filter_var(getenv('DB_SSL') ?: 'false', FILTER_VALIDATE_BOOLEAN),
     ],
 

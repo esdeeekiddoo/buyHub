@@ -143,8 +143,8 @@ include __DIR__ . '/includes/header.php';
 
                     <a class="tile__media" href="item.php?id=<?= (int) $item['id'] ?>"
                        tabindex="-1" aria-hidden="true">
-                        <?php if (!empty($item['photo'])): ?>
-                            <img src="uploads/<?= e($item['photo']) ?>" alt="" loading="lazy">
+                        <?php if (item_photo_url($item) !== null): ?>
+                            <img src="<?= e(item_photo_url($item)) ?>" alt="" loading="lazy">
                         <?php else: ?>
                             <span class="tile__photo-missing">No photo</span>
                         <?php endif; ?>

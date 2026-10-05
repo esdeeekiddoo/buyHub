@@ -63,6 +63,7 @@ include __DIR__ . '/includes/header.php';
                         <?= icon('user', ['size' => 18, 'class' => 'control__icon']) ?>
                         <input type="text" id="first_name" name="first_name" maxlength="40"
                                required autocomplete="given-name"
+                               placeholder="Aisyah"
                                value="<?= e($old['first_name'] ?? '') ?>">
                     </div>
                 </div>
@@ -73,6 +74,7 @@ include __DIR__ . '/includes/header.php';
                         <?= icon('user', ['size' => 18, 'class' => 'control__icon']) ?>
                         <input type="text" id="last_name" name="last_name" maxlength="40"
                                required autocomplete="family-name"
+                               placeholder="Rahman"
                                value="<?= e($old['last_name'] ?? '') ?>">
                     </div>
                 </div>
@@ -85,6 +87,7 @@ include __DIR__ . '/includes/header.php';
                     <?= icon('mail', ['size' => 18, 'class' => 'control__icon']) ?>
                     <input type="email" id="email" name="email" maxlength="190"
                            required autocomplete="email"
+                           placeholder="you@example.com"
                            value="<?= e($old['email'] ?? '') ?>">
                 </div>
             </div>
@@ -117,6 +120,7 @@ include __DIR__ . '/includes/header.php';
                     <?= icon('lock', ['size' => 18, 'class' => 'control__icon']) ?>
                     <input type="password" id="password" name="password" minlength="6"
                            required autocomplete="new-password"
+                           placeholder="At least 6 characters"
                            data-strength-input>
                     <!-- Reveal toggle. The button works without JS because
                          it is only useful WITH JS; the field stays a plain
@@ -141,6 +145,7 @@ include __DIR__ . '/includes/header.php';
                     <?= icon('lock', ['size' => 18, 'class' => 'control__icon']) ?>
                     <input type="password" id="password_confirm" name="password_confirm"
                            minlength="6" required autocomplete="new-password"
+                           placeholder="Repeat your password"
                            data-match="password">
                 </div>
                 <p class="help" data-match-note></p>

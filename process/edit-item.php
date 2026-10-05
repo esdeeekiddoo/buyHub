@@ -58,11 +58,17 @@ if (!filter_var($stock, FILTER_VALIDATE_INT) || (int) $stock < 0) {
 }
 
 // ---- Optional new photo ----
-$new_photo = null;
-[$new_photo, $photo_error] = save_photo($_FILES['photo'] ?? null);
+// Only touch the photo when a file was actually sent. Leaving the box
+// empty keeps whatever is already there - no re-upload needed.
+$new_data = null;
+$new_mime = null;
 
-if ($photo_error !== null) {
-    $errors[] = $photo_error;
+if (has_upload($_FILES['photo'] ?? null)) {
+    [$new_data, $new_mime, $photo_error] = save_photo($_FILES['photo'] ?? null);
+
+    if ($photo_error !== null) {
+        $errors[] = $photo_error;
+    }
 }
 
 if ($errors !== []) {
@@ -80,8 +86,9 @@ $data = [
     'stock'       => (int) $stock,
 ];
 
-if ($new_photo !== null) {
-    $data['photo'] = $new_photo;
+if ($new_data !== null) {
+    // Mark the row as having a photo even if it never had one before.
+    $data['photo'] = 'db';
 }
 
 $set = implode(', ', array_map(static fn (string $col): string => "$col = ?", array_keys($data)));
@@ -89,10 +96,20 @@ $set = implode(', ', array_map(static fn (string $col): string => "$col = ?", ar
 $stmt = db()->prepare("UPDATE items SET $set WHERE id = ? AND user_id = ?");
 $stmt->execute(array_merge(array_values($data), [$item_id, $_SESSION['user_id']]));
 
-// Only now, after the database has the new picture, delete the old one.
-// If you deleted it first and the update failed, you would have lost it.
-if ($new_photo !== null && !empty($item['photo'])) {
-    delete_photo($item['photo']);
+// Store/replace the bytes. INSERT ... ON DUPLICATE KEY means this works
+// whether the item had a photo before or not.
+if ($new_data !== null && $new_mime !== null) {
+    $stmt = db()->prepare(
+        'INSERT INTO item_photos (item_id, mime, data)
+         VALUES (?, ?, ?)
+         ON DUPLICATE KEY UPDATE mime = VALUES(mime), data = VALUES(data)'
+    );
+    $stmt->execute([$item_id, $new_mime, $new_data]);
+
+    // If the old photo was a file on disk (legacy sample data), remove it.
+    if (!empty($item['photo']) && $item['photo'] !== 'db') {
+        delete_photo($item['photo']);
+    }
 }
 
 flash('Item updated.');

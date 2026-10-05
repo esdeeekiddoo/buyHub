@@ -54,8 +54,8 @@ include __DIR__ . '/includes/header.php';
             <?php foreach ($rows as $row): ?>
                 <div class="row">
 
-                    <?php if (!empty($row['photo'])): ?>
-                        <img class="row__thumb" src="uploads/<?= e($row['photo']) ?>" alt="" loading="lazy">
+                    <?php if ($row['photo'] !== null && $row['photo'] !== ''): ?>
+                        <img class="row__thumb" src="image.php?id=<?= (int) $row['item_id'] ?>" alt="" loading="lazy">
                     <?php else: ?>
                         <div class="row__thumb"></div>
                     <?php endif; ?>

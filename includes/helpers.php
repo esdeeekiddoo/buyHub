@@ -87,6 +87,35 @@ function age_from(?string $birthDate): ?int
 }
 
 /**
+ * The URL of an item's photo, or null when it has none.
+ *
+ * Photos live in the database, so the browser asks image.php for them by
+ * item id. A legacy item whose photo is still a file in /uploads/ is
+ * handled by image.php too, which is why this does not need to know
+ * which kind it is - only whether a photo exists at all.
+ */
+function item_photo_url(?array $item): ?string
+{
+    if ($item === null || empty($item['photo'])) {
+        return null;
+    }
+
+    return 'image.php?id=' . (int) ($item['id'] ?? 0);
+}
+
+/**
+ * A short, unique id that ties together every line of one checkout.
+ *
+ * Format: ORD- plus the date plus six random digits, e.g.
+ * ORD-20261005-483920. It is only a label for the receipt - the
+ * purchases table's own id stays the real key.
+ */
+function new_order_id(): string
+{
+    return 'ORD-' . date('Ymd') . '-' . random_int(100000, 999999);
+}
+
+/**
  * Format a number as a price: 12.5 becomes "₱12.50".
  *
  * The symbol is the ISO 4217 code for the Philippine peso, U+20B1. It is

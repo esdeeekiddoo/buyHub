@@ -283,4 +283,36 @@
             if (!event.target.closest('.topbar')) { setOpen(false); }
         });
     }
+    /* ---------------------------------------------------------------
+       7. Receipt dialogs
+       The "Receipt" button names the dialog it opens in a data attribute,
+       so this one listener covers every order without extra markup.
+       <dialog> is used for its built-in focus handling and Escape key;
+       if the browser is old and cannot open it, we do nothing and the
+       order total on the row is still readable.
+       --------------------------------------------------------------- */
+    var dialogSupported = function (dialog) {
+        return dialog && typeof dialog.showModal === 'function';
+    };
+
+    document.querySelectorAll('[data-receipt]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            var dialog = document.getElementById(button.getAttribute('data-receipt'));
+            if (dialogSupported(dialog)) { dialog.showModal(); }
+        });
+    });
+
+    document.querySelectorAll('[data-receipt-close]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            var dialog = button.closest('dialog');
+            if (dialog) { dialog.close(); }
+        });
+    });
+
+    /* Click the dimmed area outside the panel to close it. */
+    document.querySelectorAll('dialog.receipt').forEach(function (dialog) {
+        dialog.addEventListener('click', function (event) {
+            if (event.target === dialog) { dialog.close(); }
+        });
+    });
 })();

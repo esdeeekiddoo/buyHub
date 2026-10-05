@@ -19,12 +19,35 @@ $stmt = db()->prepare(
 $stmt->execute([$_SESSION['user_id']]);
 $orders = $stmt->fetchAll();
 
+// Group lines into orders. Everything bought in one checkout shares an
+// order_id; older rows (or a single Buy) fall back to their own id.
+$groups = [];
+foreach ($orders as $order) {
+    $key = $order['order_id'] ?: 'single-' . $order['id'];
+    if (!isset($groups[$key])) {
+        $groups[$key] = [
+            'id'    => $order['order_id'] ?: null,
+            'date'  => $order['created_at'],
+            'lines' => [],
+            'total' => 0.0,
+        ];
+    }
+    $groups[$key]['lines'][] = $order;
+    $groups[$key]['total']  += (float) $order['unit_price'] * (int) $order['quantity'];
+}
+
+$grand_total = 0.0;
+foreach ($groups as $group) {
+    $grand_total += $group['total'];
+}
+
 include __DIR__ . '/includes/header.php';
 ?>
 
 <div class="page-head rise-1">
     <h1>My orders</h1>
-    <p><?= count($orders) ?> <?= count($orders) === 1 ? 'thing' : 'things' ?> you have bought.</p>
+    <p><?= count($groups) ?> <?= count($groups) === 1 ? 'order' : 'orders' ?>
+       &middot; <?= count($orders) ?> <?= count($orders) === 1 ? 'item' : 'items' ?> bought.</p>
 </div>
 
 <?php if ($orders === []): ?>
@@ -43,31 +66,84 @@ include __DIR__ . '/includes/header.php';
 
     <div class="sheet rise-2">
         <div class="rows">
-            <?php foreach ($orders as $order): ?>
+            <?php $receipt_index = 0; ?>
+            <?php foreach ($groups as $group): ?>
+                <?php $receipt_index++; ?>
                 <div class="row">
 
                     <div class="row__thumb row__thumb--icon"><?= icon('package', ['size' => 22]) ?></div>
 
                     <div class="row__main">
-                        <?php if ($order['item_id'] !== null): ?>
-                            <a class="row__title" href="item.php?id=<?= (int) $order['item_id'] ?>">
-                                <?= e($order['title']) ?>
-                            </a>
-                        <?php else: ?>
-                            <span class="row__title"><?= e($order['title']) ?></span>
-                        <?php endif; ?>
+                        <span class="row__title">
+                            <?= $group['id'] !== null ? e($group['id']) : 'Order #' . $receipt_index ?>
+                        </span>
                         <p class="row__meta">
-                            <span><?= (int) $order['quantity'] ?> × <?= money($order['unit_price']) ?> each</span>
-                            <span>&middot; <?= date('M j, Y', strtotime($order['created_at'])) ?></span>
+                            <span><?= count($group['lines']) ?>
+                                  <?= count($group['lines']) === 1 ? 'item' : 'items' ?></span>
+                            <span>&middot; <?= date('M j, Y', strtotime($group['date'])) ?></span>
                         </p>
                     </div>
                     <div class="row__end">
-                        <span class="price"><?= money($order['unit_price'] * $order['quantity']) ?></span>
+                        <span class="price"><?= money($group['total']) ?></span>
+                        <button type="button" class="btn btn--small btn--quiet"
+                                data-receipt="receipt-<?= $receipt_index ?>">
+                            <?= icon('receipt', ['size' => 15]) ?>
+                            <span>Receipt</span>
+                        </button>
                     </div>
                 </div>
             <?php endforeach; ?>
         </div>
     </div>
+
+    <div class="panel" style="margin-top:24px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+            <p style="font-size:15px;"><strong>Total spent</strong></p>
+            <p class="price" style="font-size:20px;"><?= money($grand_total) ?></p>
+        </div>
+    </div>
+
+    <!-- ---------- receipts: one hidden dialog per order ---------- -->
+    <?php $receipt_index = 0; ?>
+    <?php foreach ($groups as $group): ?>
+        <?php $receipt_index++; ?>
+        <dialog class="receipt" id="receipt-<?= $receipt_index ?>">
+            <div class="receipt__head">
+                <div>
+                    <p class="receipt__label">Receipt</p>
+                    <p class="receipt__no"><?= $group['id'] !== null ? e($group['id']) : 'Order #' . $receipt_index ?></p>
+                </div>
+                <button type="button" class="receipt__close" aria-label="Close"
+                        data-receipt-close>&times;</button>
+            </div>
+
+            <p class="receipt__date"><?= date('F j, Y g:i A', strtotime($group['date'])) ?></p>
+
+            <table class="receipt__table">
+                <thead>
+                    <tr><th>Item</th><th>Qty</th><th>Price</th><th>Amount</th></tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($group['lines'] as $line): ?>
+                        <tr>
+                            <td><?= e($line['title']) ?></td>
+                            <td><?= (int) $line['quantity'] ?></td>
+                            <td><?= money($line['unit_price']) ?></td>
+                            <td><?= money((float) $line['unit_price'] * (int) $line['quantity']) ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3">Total</td>
+                        <td class="price"><?= money($group['total']) ?></td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <p class="receipt__note">Thanks for shopping with <?= e($config['site_name']) ?>.</p>
+        </dialog>
+    <?php endforeach; ?>
 
 <?php endif; ?>
 

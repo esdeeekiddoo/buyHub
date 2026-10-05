@@ -48,8 +48,8 @@ include __DIR__ . '/includes/header.php';
             <?php foreach ($my_items as $item): ?>
                 <div class="row">
 
-                    <?php if (!empty($item['photo'])): ?>
-                        <img class="row__thumb" src="uploads/<?= e($item['photo']) ?>" alt="" loading="lazy">
+                    <?php if ($item['photo'] !== null && $item['photo'] !== ''): ?>
+                        <img class="row__thumb" src="image.php?id=<?= (int) $item['id'] ?>" alt="" loading="lazy">
                     <?php else: ?>
                         <div class="row__thumb"></div>
                     <?php endif; ?>

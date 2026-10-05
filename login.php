@@ -49,7 +49,8 @@ include __DIR__ . '/includes/header.php';
                 <div class="control">
                     <?= icon('mail', ['size' => 18, 'class' => 'control__icon']) ?>
                     <input type="email" id="email" name="email" maxlength="190" required autofocus
-                           autocomplete="email" value="<?= e($old_email) ?>">
+                           autocomplete="email" placeholder="you@example.com"
+                           value="<?= e($old_email) ?>">
                 </div>
             </div>
 
@@ -58,7 +59,7 @@ include __DIR__ . '/includes/header.php';
                 <div class="control">
                     <?= icon('lock', ['size' => 18, 'class' => 'control__icon']) ?>
                     <input type="password" id="password" name="password" required
-                           autocomplete="current-password">
+                           autocomplete="current-password" placeholder="Your password">
                     <button type="button" class="control__reveal"
                             data-reveal="password" aria-label="Show password"
                             aria-pressed="false">
