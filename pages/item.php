@@ -43,7 +43,7 @@ include __DIR__ . '/../includes/header.php';
 <div class="sheet">
     <div class="detail">
 
-        <div class="detail__media">
+        <div class="detail__media rise-1">
             <?php if (item_photo_url($item) !== null): ?>
                 <img src="<?= e(item_photo_url($item)) ?>" alt="<?= e($item['title']) ?>">
             <?php else: ?>
@@ -51,7 +51,7 @@ include __DIR__ . '/../includes/header.php';
             <?php endif; ?>
         </div>
 
-        <div>
+        <div class="rise-2">
             <h1 class="detail__title"><?= e($item['title']) ?></h1>
 
             <p class="price price--large price--shimmer detail__price"><?= money($item['price']) ?></p>
