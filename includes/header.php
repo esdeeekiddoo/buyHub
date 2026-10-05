@@ -28,8 +28,8 @@ $flash = show_flash();
     <link rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Nunito:wght@600;700;800&display=swap">
 
-    <link rel="stylesheet" href="assets/style.css">
-    <link rel="icon" type="image/png" href="assets/images/favicon.png">
+    <link rel="stylesheet" href="<?= e(base_url('assets/style.css')) ?>">
+    <link rel="icon" type="image/png" href="<?= e(base_url('assets/images/favicon.png')) ?>">
 
     <script>document.documentElement.classList.add('js');</script>
 
@@ -52,7 +52,7 @@ $flash = show_flash();
 <header class="topbar">
     <div class="wrap topbar__inner">
 
-        <a class="wordmark" href="index.php"><?= e($config['site_name']) ?></a>
+        <a class="wordmark" href="<?= e(page_url('index.php')) ?>"><?= e($config['site_name']) ?></a>
 
         <button type="button" class="nav-toggle" data-nav-toggle
                 aria-expanded="false" aria-controls="main-nav" aria-label="Menu">
@@ -62,21 +62,21 @@ $flash = show_flash();
         <nav class="nav" id="main-nav" aria-label="Main">
             <!-- Centre zone: the browsing and shopping links. -->
             <div class="nav__group nav__group--center">
-                <a class="nav__link" href="browse.php">
+                <a class="nav__link" href="<?= e(page_url('browse.php')) ?>">
                     <?= icon('layout-grid', ['size' => 17]) ?>
                     <span>Browse</span>
                 </a>
 
                 <?php if (is_logged_in()): ?>
-                    <a class="nav__link" href="add-item.php">
+                    <a class="nav__link" href="<?= e(page_url('add-item.php')) ?>">
                         <?= icon('shopping-bag', ['size' => 17]) ?>
                         <span>Sell an item</span>
                     </a>
-                    <a class="nav__link" href="my-items.php">
+                    <a class="nav__link" href="<?= e(page_url('my-items.php')) ?>">
                         <?= icon('package', ['size' => 17]) ?>
                         <span>My items</span>
                     </a>
-                    <a class="nav__link" href="cart.php">
+                    <a class="nav__link" href="<?= e(page_url('cart.php')) ?>">
                         <?= icon('shopping-cart', ['size' => 17]) ?>
                         <span>Cart</span>
                     </a>
@@ -86,7 +86,7 @@ $flash = show_flash();
             <!-- Right zone: orders, who you are, and logging out. -->
             <div class="nav__group nav__group--end">
                 <?php if (is_logged_in()): ?>
-                    <a class="nav__link" href="my-orders.php">
+                    <a class="nav__link" href="<?= e(page_url('my-orders.php')) ?>">
                         <?= icon('package', ['size' => 17]) ?>
                         <span>My orders</span>
                     </a>
@@ -96,7 +96,7 @@ $flash = show_flash();
                         <span>Hi, <?= e(first_name_of(current_user())) ?></span>
                     </span>
 
-                    <form action="process/logout.php" method="post" class="inline-form">
+                    <form action="<?= e(base_url('process/logout.php')) ?>" method="post" class="inline-form">
                         <?= csrf_field() ?>
                         <button type="submit" class="btn btn--quiet" title="Log out">
                             <?= icon('log-out', ['size' => 17]) ?>
@@ -104,11 +104,11 @@ $flash = show_flash();
                         </button>
                     </form>
                 <?php else: ?>
-                    <a class="nav__link" href="login.php">
+                    <a class="nav__link" href="<?= e(page_url('login.php')) ?>">
                         <?= icon('log-in', ['size' => 17]) ?>
                         <span>Log in</span>
                     </a>
-                    <a class="btn btn--small" href="register.php">
+                    <a class="btn btn--small" href="<?= e(page_url('register.php')) ?>">
                         <?= icon('user-plus', ['size' => 16]) ?>
                         <span>Create an account</span>
                     </a>

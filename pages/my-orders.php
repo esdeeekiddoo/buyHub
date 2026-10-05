@@ -3,9 +3,9 @@
  * my-orders.php - the things you have purchased
  */
 
-require_once __DIR__ . '/includes/db.php';
-require_once __DIR__ . '/includes/auth.php';
-require_once __DIR__ . '/includes/icons.php';
+require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/icons.php';
 
 require_login();
 
@@ -41,7 +41,7 @@ foreach ($groups as $group) {
     $grand_total += $group['total'];
 }
 
-include __DIR__ . '/includes/header.php';
+include __DIR__ . '/../includes/header.php';
 ?>
 
 <div class="page-head rise-1">
@@ -56,7 +56,7 @@ include __DIR__ . '/includes/header.php';
         <div class="empty__icon"><?= icon('package', ['size' => 34]) ?></div>
         <h2>No orders yet</h2>
         <p>When you buy or check out, your purchases show up here with the total paid.</p>
-        <a class="btn" href="browse.php">
+        <a class="btn" href="<?= e(page_url('browse.php')) ?>">
             <?= icon('search', ['size' => 17]) ?>
             <span>Browse items</span>
         </a>
@@ -147,4 +147,4 @@ include __DIR__ . '/includes/header.php';
 
 <?php endif; ?>
 
-<?php include __DIR__ . '/includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes/footer.php'; ?>

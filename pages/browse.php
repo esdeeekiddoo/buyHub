@@ -7,10 +7,10 @@
  * button, and nothing on this page changes data.
  */
 
-require_once __DIR__ . '/includes/db.php';
-require_once __DIR__ . '/includes/auth.php';
-require_once __DIR__ . '/includes/icons.php';
-require_once __DIR__ . '/includes/search.php';
+require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/icons.php';
+require_once __DIR__ . '/../includes/search.php';
 
 $page_title = 'Browse';
 
@@ -30,7 +30,7 @@ $sort_options = search_sort_options();
 // slider is about before they touch it.
 $fmt = static fn ($n) => money((float) $n);
 
-include __DIR__ . '/includes/header.php';
+include __DIR__ . '/../includes/header.php';
 ?>
 
 <div class="page-head rise-1">
@@ -57,7 +57,7 @@ include __DIR__ . '/includes/header.php';
      borderless strip: no boxed panel, no labels stacked above each
      field, no second full-size button.
      ================================================================== -->
-<form class="filters rise-2" action="browse.php" method="get" role="search">
+<form class="filters rise-2" action="<?= e(page_url('browse.php')) ?>" method="get" role="search">
 
     <div class="searchbar">
         <div class="searchbar__field control">
@@ -109,7 +109,7 @@ include __DIR__ . '/includes/header.php';
             <button type="submit" class="btn btn--small filters__apply">Apply</button>
 
             <?php if (search_has_filters($filters)): ?>
-                <a class="filters__clear" href="browse.php">
+                <a class="filters__clear" href="<?= e(page_url('browse.php')) ?>">
                     <?= icon('x', ['size' => 14]) ?>
                     <span>Clear</span>
                 </a>
@@ -125,12 +125,12 @@ include __DIR__ . '/includes/header.php';
         <h2>Nothing matched</h2>
         <p>Try a shorter search, or widen the price range.</p>
         <?php if (search_has_filters($filters)): ?>
-            <a class="btn" href="browse.php">
+            <a class="btn" href="<?= e(page_url('browse.php')) ?>">
                 <?= icon('x', ['size' => 17]) ?>
                 <span>Clear all filters</span>
             </a>
         <?php else: ?>
-            <a class="btn" href="index.php">Back to the home page</a>
+            <a class="btn" href="<?= e(page_url('index.php')) ?>">Back to the home page</a>
         <?php endif; ?>
     </div>
 
@@ -141,7 +141,7 @@ include __DIR__ . '/includes/header.php';
             <?php foreach ($items as $item): ?>
                 <article class="tile">
 
-                    <a class="tile__media" href="item.php?id=<?= (int) $item['id'] ?>"
+                    <a class="tile__media" href="<?= e(page_url('item.php?id=' . (int) $item['id'])) ?>"
                        tabindex="-1" aria-hidden="true">
                         <?php if (item_photo_url($item) !== null): ?>
                             <img src="<?= e(item_photo_url($item)) ?>" alt="" loading="lazy">
@@ -173,7 +173,7 @@ include __DIR__ . '/includes/header.php';
                             <span class="price"><?= money($item['price']) ?></span>
 
                             <a class="btn btn--small btn--soft"
-                               href="item.php?id=<?= (int) $item['id'] ?>">View</a>
+                               href="<?= e(page_url('item.php?id=' . (int) $item['id'])) ?>">View</a>
                         </div>
                     </div>
 
@@ -186,7 +186,7 @@ include __DIR__ . '/includes/header.php';
     <?php if ($pages > 1): ?>
         <nav class="pager rise-4" aria-label="Pages">
             <?php if ($page > 1): ?>
-                <a class="pager__step" href="browse.php<?= search_query(['page' => $page - 1]) ?>">
+                <a class="pager__step" href="<?= e(page_url('browse.php') . search_query(['page' => $page - 1])) ?>">
                     <?= icon('chevron-left', ['size' => 16]) ?>
                     <span>Previous</span>
                 </a>
@@ -200,7 +200,7 @@ include __DIR__ . '/includes/header.php';
             <span class="pager__status">Page <?= $page ?> of <?= $pages ?></span>
 
             <?php if ($page < $pages): ?>
-                <a class="pager__step" href="browse.php<?= search_query(['page' => $page + 1]) ?>">
+                <a class="pager__step" href="<?= e(page_url('browse.php') . search_query(['page' => $page + 1])) ?>">
                     <span>Next</span>
                     <?= icon('chevron-right', ['size' => 16]) ?>
                 </a>
@@ -215,4 +215,4 @@ include __DIR__ . '/includes/header.php';
 
 <?php endif; ?>
 
-<?php include __DIR__ . '/includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes/footer.php'; ?>

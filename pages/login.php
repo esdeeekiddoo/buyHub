@@ -3,8 +3,8 @@
  * login.php - log in form
  */
 
-require_once __DIR__ . '/includes/auth.php';
-require_once __DIR__ . '/includes/icons.php';
+require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/icons.php';
 
 if (is_logged_in()) {
     redirect('index.php');
@@ -15,7 +15,7 @@ $error  = $_SESSION['error'] ?? null;
 $old_email = $_SESSION['old_email'] ?? '';
 unset($_SESSION['error'], $_SESSION['old_email']);
 
-include __DIR__ . '/includes/header.php';
+include __DIR__ . '/../includes/header.php';
 ?>
 
 <div class="auth">
@@ -41,7 +41,7 @@ include __DIR__ . '/includes/header.php';
             </div>
         <?php endif; ?>
 
-        <form action="process/login.php" method="post">
+        <form action="<?= e(base_url('process/login.php')) ?>" method="post">
             <?= csrf_field() ?>
 
             <div class="field">
@@ -78,10 +78,10 @@ include __DIR__ . '/includes/header.php';
         </form>
 
         <p class="auth__switch">
-            No account yet? <a href="register.php">Create one free</a>
+            No account yet? <a href="<?= e(page_url('register.php')) ?>">Create one free</a>
         </p>
 
     </div>
 </div>
 
-<?php include __DIR__ . '/includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes/footer.php'; ?>

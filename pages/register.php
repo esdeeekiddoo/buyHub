@@ -3,8 +3,8 @@
  * register.php - create an account
  */
 
-require_once __DIR__ . '/includes/auth.php';
-require_once __DIR__ . '/includes/icons.php';
+require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/icons.php';
 
 if (is_logged_in()) {
     redirect('index.php');
@@ -15,7 +15,7 @@ $errors = $_SESSION['errors'] ?? [];
 $old    = $_SESSION['old'] ?? [];
 unset($_SESSION['errors'], $_SESSION['old']);
 
-include __DIR__ . '/includes/header.php';
+include __DIR__ . '/../includes/header.php';
 ?>
 
 <div class="auth">
@@ -52,7 +52,7 @@ include __DIR__ . '/includes/header.php';
             </div>
         <?php endif; ?>
 
-        <form action="process/register.php" method="post" novalidate>
+        <form action="<?= e(base_url('process/register.php')) ?>" method="post" novalidate>
             <?= csrf_field() ?>
 
             <!-- ---------- names ---------- -->
@@ -220,4 +220,4 @@ include __DIR__ . '/includes/header.php';
     </div>
 </div>
 
-<?php include __DIR__ . '/includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes/footer.php'; ?>

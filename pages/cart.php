@@ -3,9 +3,9 @@
  * cart.php - the shopper's basket
  */
 
-require_once __DIR__ . '/includes/db.php';
-require_once __DIR__ . '/includes/auth.php';
-require_once __DIR__ . '/includes/icons.php';
+require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/icons.php';
 
 require_login();
 
@@ -27,7 +27,7 @@ foreach ($rows as $row) {
     $total += (float) $row['price'] * (int) $row['quantity'];
 }
 
-include __DIR__ . '/includes/header.php';
+include __DIR__ . '/../includes/header.php';
 ?>
 
 <div class="page-head rise-1">
@@ -41,7 +41,7 @@ include __DIR__ . '/includes/header.php';
         <div class="empty__icon"><?= icon('shopping-cart', ['size' => 34]) ?></div>
         <h2>Your cart is empty</h2>
         <p>When you add something you like, it waits here until you check out.</p>
-        <a class="btn" href="browse.php">
+        <a class="btn" href="<?= e(page_url('browse.php')) ?>">
             <?= icon('search', ['size' => 17]) ?>
             <span>Browse items</span>
         </a>
@@ -55,13 +55,13 @@ include __DIR__ . '/includes/header.php';
                 <div class="row">
 
                     <?php if ($row['photo'] !== null && $row['photo'] !== ''): ?>
-                        <img class="row__thumb" src="image.php?id=<?= (int) $row['item_id'] ?>" alt="" loading="lazy">
+                        <img class="row__thumb" src="<?= e(base_url('image.php?id=' . (int) $row['item_id'])) ?>" alt="" loading="lazy">
                     <?php else: ?>
                         <div class="row__thumb"></div>
                     <?php endif; ?>
 
                     <div class="row__main">
-                        <a class="row__title" href="item.php?id=<?= (int) $row['item_id'] ?>">
+                        <a class="row__title" href="<?= e(page_url('item.php?id=' . (int) $row['item_id'])) ?>">
                             <?= e($row['title']) ?>
                         </a>
                         <p class="row__meta">
@@ -82,7 +82,7 @@ include __DIR__ . '/includes/header.php';
                         <span class="price"><?= money($row['price'] * $row['quantity']) ?></span>
 
                         <div class="row__actions">
-                            <form action="process/update-cart.php" method="post" class="inline-form">
+                            <form action="<?= e(base_url('process/update-cart.php')) ?>" method="post" class="inline-form">
                                 <?= csrf_field() ?>
                                 <input type="hidden" name="cart_id" value="<?= (int) $row['cart_id'] ?>">
                                 <input type="number" name="quantity" min="1" max="<?= (int) $row['stock'] ?>"
@@ -90,7 +90,7 @@ include __DIR__ . '/includes/header.php';
                                 <button type="submit" class="btn btn--small btn--quiet">Update</button>
                             </form>
 
-                            <form action="process/remove-cart.php" method="post" class="inline-form">
+                            <form action="<?= e(base_url('process/remove-cart.php')) ?>" method="post" class="inline-form">
                                 <?= csrf_field() ?>
                                 <input type="hidden" name="cart_id" value="<?= (int) $row['cart_id'] ?>">
                                 <button type="submit" class="btn btn--small btn--danger">
@@ -111,7 +111,7 @@ include __DIR__ . '/includes/header.php';
             <p style="font-size:15px;"><strong>Total</strong></p>
             <p class="price" style="font-size:20px;"><?= money($total) ?></p>
         </div>
-        <form action="process/checkout.php" method="post" style="margin-top:16px;">
+        <form action="<?= e(base_url('process/checkout.php')) ?>" method="post" style="margin-top:16px;">
             <?= csrf_field() ?>
             <button type="submit" class="btn btn--block">
                 <?= icon('check', ['size' => 18]) ?>
@@ -122,4 +122,4 @@ include __DIR__ . '/includes/header.php';
 
 <?php endif; ?>
 
-<?php include __DIR__ . '/includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes/footer.php'; ?>

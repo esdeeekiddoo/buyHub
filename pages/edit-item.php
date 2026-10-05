@@ -3,9 +3,9 @@
  * edit-item.php - change one of my own items
  */
 
-require_once __DIR__ . '/includes/db.php';
-require_once __DIR__ . '/includes/auth.php';
-require_once __DIR__ . '/includes/upload.php';
+require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/upload.php';
 
 require_login();
 
@@ -34,11 +34,11 @@ $errors = $_SESSION['errors'] ?? [];
 $old    = $_SESSION['old'] ?? [];
 unset($_SESSION['errors'], $_SESSION['old']);
 
-require_once __DIR__ . '/includes/icons.php';
+require_once __DIR__ . '/../includes/icons.php';
 
 $allow_no_photo = true;      // tells the shared fields a photo is optional
 
-include __DIR__ . '/includes/header.php';
+include __DIR__ . '/../includes/header.php';
 ?>
 
 <div class="page-head rise-1">
@@ -56,12 +56,12 @@ include __DIR__ . '/includes/header.php';
         </div>
     <?php endif; ?>
 
-    <form action="process/edit-item.php" method="post" enctype="multipart/form-data">
+    <form action="<?= e(base_url('process/edit-item.php')) ?>" method="post" enctype="multipart/form-data">
         <?= csrf_field() ?>
         <input type="hidden" name="item_id" value="<?= (int) $item['id'] ?>">
-        <?php include __DIR__ . '/includes/item-fields.php'; ?>
+        <?php include __DIR__ . '/../includes/item-fields.php'; ?>
     </form>
 
 </div>
 
-<?php include __DIR__ . '/includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes/footer.php'; ?>

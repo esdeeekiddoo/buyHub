@@ -90,7 +90,7 @@ $photo_optional      = !empty($allow_no_photo);
         <?php endif; ?>
     </p>
     <?php if ($photo_optional && $current_photo !== '' && !empty($item['id'])): ?>
-        <img class="field-photo" src="image.php?id=<?= (int) $item['id'] ?>"
+        <img class="field-photo" src="<?= e(base_url('image.php?id=' . (int) $item['id'])) ?>"
              alt="Current photo" loading="lazy">
     <?php endif; ?>
 </div>
@@ -100,5 +100,5 @@ $photo_optional      = !empty($allow_no_photo);
         <?= icon($photo_optional ? 'check' : 'camera', ['size' => 18]) ?>
         <span><?= $photo_optional ? 'Save changes' : 'List this item' ?></span>
     </button>
-    <a class="btn btn--quiet" href="<?= $photo_optional ? 'my-items.php' : 'index.php' ?>">Cancel</a>
+    <a class="btn btn--quiet" href="<?= e(page_url($photo_optional ? 'my-items.php' : 'index.php')) ?>">Cancel</a>
 </div>

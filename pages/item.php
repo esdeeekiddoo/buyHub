@@ -5,9 +5,9 @@
  * The id arrives in the URL:  item.php?id=3
  */
 
-require_once __DIR__ . '/includes/db.php';
-require_once __DIR__ . '/includes/auth.php';
-require_once __DIR__ . '/includes/icons.php';
+require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/icons.php';
 
 // Cast to (int): item.php?id=abc becomes 0, which matches nothing,
 // instead of throwing a database error.
@@ -26,18 +26,18 @@ $item = $stmt->fetch();
 if (!$item) {
     http_response_code(404);
     $page_title = 'Item not found';
-    include __DIR__ . '/includes/header.php';
+    include __DIR__ . '/../includes/header.php';
     echo '<div class="empty" style="margin-block:40px;">'
        . '<h2>That item is gone</h2>'
        . '<p>It may have been sold or taken down by its owner.</p>'
-       . '<a class="btn" href="index.php">See what else is available</a>'
+       . '<a class="btn" href="' . e(page_url('index.php')) . '">See what else is available</a>'
        . '</div>';
-    include __DIR__ . '/includes/footer.php';
+    include __DIR__ . '/../includes/footer.php';
     exit;
 }
 
 $page_title = $item['title'];
-include __DIR__ . '/includes/header.php';
+include __DIR__ . '/../includes/header.php';
 ?>
 
 <div class="sheet">
@@ -86,18 +86,18 @@ include __DIR__ . '/includes/header.php';
             <div class="detail__action">
                 <?php if ($item['stock'] == 0): ?>
 
-                    <a class="btn btn--block btn--quiet" href="index.php">See other items</a>
+                    <a class="btn btn--block btn--quiet" href="<?= e(page_url('index.php')) ?>">See other items</a>
 
                 <?php elseif (is_logged_in() && (int) $item['user_id'] === (int) $_SESSION['user_id']): ?>
 
-                    <a class="btn btn--block btn--quiet" href="edit-item.php?id=<?= (int) $item['id'] ?>">
+                    <a class="btn btn--block btn--quiet" href="<?= e(page_url('edit-item.php?id=' . (int) $item['id'])) ?>">
                         <?= icon('pencil', ['size' => 18]) ?>
                         <span>This is your listing</span>
                     </a>
 
                 <?php elseif (is_logged_in()): ?>
 
-                    <form action="process/buy.php" method="post">
+                    <form action="<?= e(base_url('process/buy.php')) ?>" method="post">
                         <?= csrf_field() ?>
                         <input type="hidden" name="item_id" value="<?= (int) $item['id'] ?>">
 
@@ -117,7 +117,7 @@ include __DIR__ . '/includes/header.php';
                         <!-- Same quantity, a different destination: formaction
                              on the button overrides the form's action. -->
                         <button type="submit" class="btn btn--block btn--quiet"
-                                formaction="process/add-cart.php">
+                                formaction="<?= e(base_url('process/add-cart.php')) ?>">
                             <?= icon('shopping-bag', ['size' => 18]) ?>
                             <span>Add to cart</span>
                         </button>
@@ -125,7 +125,7 @@ include __DIR__ . '/includes/header.php';
 
                 <?php else: ?>
 
-                    <a class="btn btn--block" href="login.php">
+                    <a class="btn btn--block" href="<?= e(page_url('login.php')) ?>">
                         <?= icon('log-in', ['size' => 18]) ?>
                         <span>Log in to buy this</span>
                     </a>
@@ -133,10 +133,10 @@ include __DIR__ . '/includes/header.php';
                 <?php endif; ?>
             </div>
 
-            <a class="backlink" href="index.php">Back to all items</a>
+            <a class="backlink" href="<?= e(page_url('index.php')) ?>">Back to all items</a>
         </div>
 
     </div>
 </div>
 
-<?php include __DIR__ . '/includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes/footer.php'; ?>

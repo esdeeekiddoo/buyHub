@@ -3,9 +3,9 @@
  * my-items.php - every item I posted, with Edit and Delete
  */
 
-require_once __DIR__ . '/includes/db.php';
-require_once __DIR__ . '/includes/auth.php';
-require_once __DIR__ . '/includes/icons.php';
+require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/icons.php';
 
 require_login();
 
@@ -20,7 +20,7 @@ $stmt = db()->prepare(
 $stmt->execute([$_SESSION['user_id']]);
 $my_items = $stmt->fetchAll();
 
-include __DIR__ . '/includes/header.php';
+include __DIR__ . '/../includes/header.php';
 ?>
 
 <div class="page-head rise-1">
@@ -35,7 +35,7 @@ include __DIR__ . '/includes/header.php';
         <h2>You have not listed anything yet</h2>
         <p>Put up something you no longer need. Add a photo, name a price, and it
            shows up on the home page straight away.</p>
-        <a class="btn" href="add-item.php">
+        <a class="btn" href="<?= e(page_url('add-item.php')) ?>">
             <?= icon('camera', ['size' => 18]) ?>
             <span>List your first item</span>
         </a>
@@ -49,13 +49,13 @@ include __DIR__ . '/includes/header.php';
                 <div class="row">
 
                     <?php if ($item['photo'] !== null && $item['photo'] !== ''): ?>
-                        <img class="row__thumb" src="image.php?id=<?= (int) $item['id'] ?>" alt="" loading="lazy">
+                        <img class="row__thumb" src="<?= e(base_url('image.php?id=' . (int) $item['id'])) ?>" alt="" loading="lazy">
                     <?php else: ?>
                         <div class="row__thumb"></div>
                     <?php endif; ?>
 
                     <div class="row__main">
-                        <a class="row__title" href="item.php?id=<?= (int) $item['id'] ?>">
+                        <a class="row__title" href="<?= e(page_url('item.php?id=' . (int) $item['id'])) ?>">
                             <?= e($item['title']) ?>
                         </a>
                         <p class="row__meta">
@@ -79,13 +79,13 @@ include __DIR__ . '/includes/header.php';
                             <!-- Opening a form only reads, so a link is right.
                                  Deleting changes data, so it must be a POST. -->
                             <a class="btn btn--small btn--quiet"
-                               href="edit-item.php?id=<?= (int) $item['id'] ?>"
+                               href="<?= e(page_url('edit-item.php?id=' . (int) $item['id'])) ?>"
                                title="Edit this item">
                                 <?= icon('pencil', ['size' => 15]) ?>
                                 <span>Edit</span>
                             </a>
 
-                            <form action="process/delete-item.php" method="post" class="inline-form">
+                            <form action="<?= e(base_url('process/delete-item.php')) ?>" method="post" class="inline-form">
                                 <?= csrf_field() ?>
                                 <input type="hidden" name="item_id" value="<?= (int) $item['id'] ?>">
                                 <button type="submit" class="btn btn--small btn--danger"
@@ -103,9 +103,9 @@ include __DIR__ . '/includes/header.php';
     </div>
 
     <p style="margin-top:24px;">
-        <a class="btn btn--soft" href="add-item.php">List another item</a>
+        <a class="btn btn--soft" href="<?= e(page_url('add-item.php')) ?>">List another item</a>
     </p>
 
 <?php endif; ?>
 
-<?php include __DIR__ . '/includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes/footer.php'; ?>

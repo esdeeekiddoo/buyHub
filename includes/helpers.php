@@ -100,7 +100,7 @@ function item_photo_url(?array $item): ?string
         return null;
     }
 
-    return 'image.php?id=' . (int) ($item['id'] ?? 0);
+    return base_url('image.php?id=' . (int) ($item['id'] ?? 0));
 }
 
 /**
@@ -200,8 +200,8 @@ function show_flash(): ?array
  *     http://marketplace.test/          -> prefix ""
  *     http://localhost/marketplace/     -> prefix "/marketplace"
  *
- * basename() alone is not enough, because files inside process/ are one
- * level deeper than the site root, so that folder is stripped off.
+ * basename() alone is not enough, because files inside process/ and pages/
+ * are one level deeper than the site root, so those folders are stripped.
  */
 function base_url(string $path = ''): string
 {
@@ -209,11 +209,14 @@ function base_url(string $path = ''): string
 
     if ($prefix === null) {
         // SCRIPT_NAME is the URL path of the running script:
-        //   /marketplace/index.php       -> dirname gives "/marketplace"
-        //   /marketplace/process/buy.php  -> dirname gives "/marketplace/process"
+        //   /marketplace/pages/index.php   -> dirname gives "/marketplace/pages"
+        //   /marketplace/process/buy.php   -> dirname gives "/marketplace/process"
+        //   /marketplace/image.php         -> dirname gives "/marketplace"
         $dir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/index.php'));
 
-        $prefix = (string) preg_replace('#/(process|includes|assets|uploads)$#', '', $dir);
+        // Any known sub-folder is stripped so the prefix is always the site
+        // root. Add a folder here if the layout gains another one.
+        $prefix = (string) preg_replace('#/(pages|process|includes|assets|uploads)$#', '', $dir);
         $prefix = rtrim($prefix, '/');
     }
 
@@ -221,17 +224,42 @@ function base_url(string $path = ''): string
 }
 
 /**
+ * A URL for a page that lives in the pages/ folder.
+ *
+ *     page_url('cart.php')  ->  /marketplace/pages/cart.php
+ *
+ * Pages are moved around by this one function, so a link never breaks
+ * just because the folder changed. Returns an absolute path, so it works
+ * no matter which folder the linking page is in.
+ */
+function page_url(string $page = ''): string
+{
+    return base_url($page === '' ? 'pages/' : 'pages/' . ltrim($page, '/'));
+}
+
+/**
  * Send the visitor to another page and stop running this file.
  *
- * "login.php"       -> turned into /marketplace/login.php for you
- * "/marketplace/x"  -> treated as already absolute and left alone
+ * A plain name is treated as a page inside pages/:
+ *     redirect('cart.php')   -> /marketplace/pages/cart.php
+ *     redirect('index.php')  -> /marketplace/pages/index.php
+ *
+ * A path starting with "/" or containing a slash is left as a site-root
+ * path, so redirect('process/x') and the stored REQUEST_URI both work.
  *
  * The second form matters because $_SESSION['redirect_to'] stores the full
  * REQUEST_URI, which is already an absolute path.
  */
 function redirect(string $path): never
 {
-    $target = str_starts_with($path, '/') ? $path : base_url($path);
+    if (str_starts_with($path, '/')) {
+        $target = $path;                       // already absolute
+    } elseif (str_contains($path, '/')) {
+        $target = base_url($path);             // e.g. process/logout.php
+    } else {
+        $target = page_url($path);             // e.g. cart.php -> pages/cart.php
+    }
+
     header('Location: ' . $target);
     exit;
 }
