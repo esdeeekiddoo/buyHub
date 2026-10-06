@@ -4,6 +4,9 @@
 Dockerfile
 .dockerignore
 README.md
-reset-items.sql
 .vscode
 *.log
+
+# Database schemas/dumps are local-only and must not be baked into the
+# deployed image.
+*.sql

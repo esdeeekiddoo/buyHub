@@ -1,0 +1,11 @@
+# Database dumps and schemas - kept locally, never committed.
+# They hold the sample accounts' password hashes and are not needed to
+# run the deployed site.
+*.sql
+
+# Local environment / editor junk
+.env
+.env.*
+.vscode
+.idea
+*.log

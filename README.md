@@ -24,10 +24,18 @@ other people buy them outright.
 
 ## Running it
 
-1. Create a MySQL database and import `database.sql`.
+1. Create a MySQL database and import `database.sql` (kept locally, not
+   committed — see the note below).
 2. Point `config.php` at the database (host, name, user, password).
 3. Open the site in a browser and create an account.
 
 ## Tech
 
 PHP, MySQL (via PDO), and plain HTML/CSS/JavaScript — no frameworks.
+
+## About the database files
+
+The SQL schema and seed files (`database.sql`, and the variants) are kept
+**locally only** and are excluded from the repository and the Docker image,
+because they contain the sample accounts' password hashes. If you clone this
+repo you will not get them — the deployed site does not need them.
