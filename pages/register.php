@@ -180,33 +180,6 @@ include __DIR__ . '/../includes/header.php';
                         </div>
                     </div>
                 </div>
-
-                <div class="field">
-                    <label for="gender">Gender</label>
-                    <div class="control control--select">
-                        <?= icon('user', ['size' => 18, 'class' => 'control__icon']) ?>
-                        <select id="gender" name="gender">
-<?php
-                            // Re-select whatever they picked before, so a
-                            // failed save does not silently reset it.
-                            $current_gender = $old['gender'] ?? 'prefer_not_to_say';
-                            $gender_options = [
-                                'prefer_not_to_say' => 'Prefer not to say',
-                                'female'            => 'Female',
-                                'male'              => 'Male',
-                                'other'             => 'Other',
-                            ];
-                            ?>
-                            <?php foreach ($gender_options as $value => $label): ?>
-                                <option value="<?= e($value) ?>"
-                                    <?= $current_gender === $value ? 'selected' : '' ?>>
-                                    <?= e($label) ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                        <?= icon('chevron-down', ['size' => 16, 'class' => 'control__caret']) ?>
-                    </div>
-                </div>
             </fieldset>
 
             <div class="form-actions">

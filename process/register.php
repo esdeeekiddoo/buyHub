@@ -24,14 +24,6 @@ $birth_date = trim($_POST['birth_date'] ?? '');
 $phone      = trim($_POST['phone'] ?? '');
 $city       = trim($_POST['city'] ?? '');
 
-// A <select> only ever sends one of its own options, but never trust that
-// - if someone posts garbage, fall back to the safe default rather than
-// letting it near the database.
-$gender = $_POST['gender'] ?? 'prefer_not_to_say';
-if (!in_array($gender, ['female', 'male', 'other', 'prefer_not_to_say'], true)) {
-    $gender = 'prefer_not_to_say';
-}
-
 // Phone: keep digits, spaces and dashes only, so nobody can paste markup
 // or a script into this field. Storing clean data beats escaping it later.
 $phone = preg_replace('/[^0-9 +\-]/', '', $phone) ?? '';
@@ -148,7 +140,6 @@ if ($errors !== []) {
         'birth_date' => $birth_date,
         'phone'      => $phone,
         'city'       => $city,
-        'gender'     => $gender,
     ];
     flash('Please fix the problems below.', 'error');
     redirect('register.php');
@@ -161,8 +152,8 @@ $hash = password_hash($password, PASSWORD_DEFAULT);
 
 $stmt = db()->prepare(
     'INSERT INTO users
-        (first_name, last_name, email, password_hash, birth_date, phone, gender, city)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+        (first_name, last_name, email, password_hash, birth_date, phone, city)
+     VALUES (?, ?, ?, ?, ?, ?, ?)'
 );
 
 $stmt->execute([
@@ -172,7 +163,6 @@ $stmt->execute([
     $hash,
     $birth_date,
     $phone === '' ? null : $phone,     // empty string means "not given"
-    $gender,
     $city === '' ? null : $city,
 ]);
 

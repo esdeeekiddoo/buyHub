@@ -56,10 +56,16 @@ function db(): PDO
                     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                     // Use real prepared statements (stronger injection defence)
                     PDO::ATTR_EMULATE_PREPARES => false,
-                    // Reuse the connection across requests. On a remote
-                    // database the TLS handshake is a large part of every
-                    // page's time, so keeping the socket open saves it.
-                    PDO::ATTR_PERSISTENT => true,
+                    // Persistent connections stay open for the life of each
+                    // web server worker. On a small host with a low
+                    // max_user_connections (Clever free allows 5) that
+                    // exhausts the pool and every request fails, so this is
+                    // OFF by default. Turn it on with DB_PERSISTENT=true only
+                    // if the host allows many connections.
+                    PDO::ATTR_PERSISTENT => filter_var(
+                        getenv('DB_PERSISTENT') ?: 'false',
+                        FILTER_VALIDATE_BOOLEAN
+                    ),
                 ]
             );
         } catch (PDOException $e) {
